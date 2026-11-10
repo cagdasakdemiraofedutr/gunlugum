@@ -1,0 +1,2381 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Günlüğüm">
+  <meta name="theme-color" content="#121212">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3238/3238012.png">
+
+  <title>Kişisel Günlük</title>
+  <style>
+    :root {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --card: #252525;
+      --border: #333333;
+      --amber: #f59e0b;
+      --amber-dim: rgba(245, 158, 11, 0.15);
+      --sky: #38bdf8;
+      --sky-dim: rgba(56, 189, 248, 0.15);
+      --purple: #c084fc;
+      --purple-dim: rgba(192, 132, 252, 0.15);
+      --rose: #fb7185;
+      --rose-dim: rgba(251, 113, 133, 0.15);
+      --emerald: #10b981;
+      --emerald-dim: rgba(16, 185, 129, 0.15);
+      --text: #f5f5f4;
+      --text-muted: #a8a29e;
+      --text-dim: #78716c;
+      --topbar-bg: #1c1917;
+      --bottomnav-bg: #18181b;
+      --btn-icon-bg: #262626;
+      --input-bg: #262626;
+      --input-border: #444;
+      --cal-today-bg: #37332f;
+      --progress-bg: #333333;
+    }
+
+    body.light-theme {
+      --bg: #f4f4f5;
+      --surface: #ffffff;
+      --card: #f8fafc;
+      --border: #e2e8f0;
+      --amber: #d97706;
+      --amber-dim: rgba(217, 119, 6, 0.15);
+      --sky: #0284c7;
+      --sky-dim: rgba(2, 132, 199, 0.15);
+      --purple: #9333ea;
+      --purple-dim: rgba(147, 51, 234, 0.15);
+      --rose: #e11d48;
+      --rose-dim: rgba(225, 29, 72, 0.15);
+      --emerald: #059669;
+      --emerald-dim: rgba(5, 150, 105, 0.15);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --topbar-bg: #ffffff;
+      --bottomnav-bg: #ffffff;
+      --btn-icon-bg: #f1f5f9;
+      --input-bg: #f8fafc;
+      --input-border: #cbd5e1;
+      --cal-today-bg: #fef3c7;
+      --progress-bg: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; width: 100%; overflow: hidden; background-color: var(--bg); color: var(--text); user-select: none; -webkit-user-select: none; transition: background-color 0.25s, color 0.25s; }
+    .app-root { display: flex; flex-direction: column; height: 100%; width: 100%; }
+
+    .top-bar { background: var(--topbar-bg); border-bottom: 1px solid var(--border); padding: 10px 16px; padding-top: calc(10px + env(safe-area-inset-top)); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .icon-btn { background: var(--btn-icon-bg); border: 1px solid var(--border); color: var(--text); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+    .date-wrap { text-align: center; }
+    .day-badge { font-size: 11px; text-transform: uppercase; color: var(--amber); font-weight: 800; }
+    .date-main { font-size: 15px; font-weight: 700; color: var(--text); }
+
+    .content-area { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; -webkit-overflow-scrolling: touch; }
+    .tab-pane { display: none; flex-direction: column; gap: 12px; }
+    .tab-pane.active { display: flex; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .card-title { font-size: 13px; font-weight: 700; color: var(--text); }
+    .badge-btn { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); padding: 5px 12px; border-radius: 99px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+    .day-meta-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 2px; }
+    .location-tag { background: var(--btn-icon-bg); border: 1px solid var(--border); border-radius: 8px; padding: 4px 10px; font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; cursor: pointer; }
+    .location-tag.has-loc { color: var(--amber); border-color: rgba(245,158,11,0.4); background: var(--amber-dim); }
+
+    .mood-selector { display: flex; gap: 6px; }
+    .mood-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: var(--btn-icon-bg); display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; opacity: 0.45; transition: 0.2s; }
+    .mood-btn.active { opacity: 1; border-color: var(--amber); background: var(--amber-dim); transform: scale(1.1); }
+
+    /* ALIŞKANLIKLAR & STREAK */
+    .habits-wrap { display: flex; gap: 8px; justify-content: space-between; }
+    .habit-chip { flex: 1; padding: 10px 4px; background: var(--btn-icon-bg); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; font-size: 11px; font-weight: 700; color: var(--text-muted); position: relative; transition: all 0.2s; }
+    .habit-chip .h-icon { font-size: 20px; filter: grayscale(1); transition: filter 0.2s; }
+    .habit-chip.active .h-icon { filter: grayscale(0); }
+    .habit-chip.active { background: var(--emerald-dim); border-color: rgba(16, 185, 129, 0.4); color: var(--emerald); }
+    .habit-chip.partial { background: var(--amber-dim); border-color: rgba(245, 158, 11, 0.4); color: var(--amber); }
+    .habit-chip.partial .h-icon { filter: grayscale(0.3); }
+    .habit-streak-badge { font-size: 9px; font-weight: 800; color: var(--amber); background: rgba(0,0,0,0.2); padding: 1px 6px; border-radius: 99px; margin-top: 2px; }
+    .habit-sub { font-size: 9px; opacity: 0.85; }
+
+    .memory-card { background: linear-gradient(135deg, rgba(192, 132, 252, 0.15), rgba(192, 132, 252, 0.02)); border: 1px solid rgba(192, 132, 252, 0.35); border-radius: 14px; padding: 12px; display: none; }
+    .memory-card.active { display: block; }
+
+    /* DİNAMİK ASİSTAN / PLAN HATIRLATICI KARTI */
+    .smart-reminder-card { border-radius: 14px; padding: 12px; display: none; margin-bottom: 2px; }
+    .smart-reminder-card.active { display: block; }
+
+    .item-row { display: flex; gap: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px; align-items: center; margin-bottom: 8px; transition: transform 0.1s; cursor: pointer; }
+    .item-row:active { transform: scale(0.98); }
+    .item-row:last-child { margin-bottom: 0; }
+    .thumb { width: 44px; height: 60px; border-radius: 6px; object-fit: cover; background: #888; flex-shrink: 0; }
+    .finish-pill { background: var(--emerald-dim); color: var(--emerald); border: 1px solid rgba(16, 185, 129, 0.4); padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; }
+
+    .progress-bar-wrap { width: 100%; height: 6px; background: var(--progress-bg); border-radius: 99px; overflow: hidden; margin-top: 4px; }
+    .progress-bar-fill { height: 100%; background: var(--amber); border-radius: 99px; transition: width 0.3s; }
+
+    /* YAPIŞKAN NOTLAR */
+    .sticky-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .sticky-note { border-radius: 12px; padding: 10px; min-height: 80px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 6px rgba(0,0,0,0.12); transition: transform 0.1s; cursor: pointer; }
+    .sticky-note:active { transform: scale(0.97); }
+    .sticky-title { font-weight: 800; font-size: 12px; color: #111; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sticky-body { font-size: 11px; color: #222; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+
+    /* ALIŞVERİŞ LİSTESİ */
+    .checklist-row { display: flex; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; margin-bottom: 6px; cursor: pointer; }
+    .checklist-row.checked .chk-text { text-decoration: line-through; color: var(--text-dim); }
+    .checklist-row.checked .chk-box { background: var(--emerald); border-color: var(--emerald); }
+    .chk-box { width: 18px; height: 18px; border-radius: 5px; border: 2px solid #888; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; margin-right: 10px; flex-shrink: 0; }
+    .cat-tag { font-size: 9px; padding: 2px 6px; border-radius: 6px; font-weight: 700; margin-left: 6px; text-transform: uppercase; }
+
+    /* TAKVİM */
+    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .cal-month-title { font-size: 15px; font-weight: 800; color: var(--text); }
+    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; color: var(--text-dim); font-weight: 700; margin-bottom: 8px; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-cell { aspect-ratio: 1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 4px 2px; cursor: pointer; position: relative; }
+    .cal-cell.other-month { opacity: 0.25; }
+    .cal-cell.today { border-color: var(--amber); }
+    .cal-cell.selected { background: var(--cal-today-bg); border-color: var(--amber); }
+    .cal-num { font-size: 12px; font-weight: 700; color: var(--text); }
+    .cal-dots { display: flex; gap: 2px; justify-content: center; min-height: 5px; flex-wrap: wrap; }
+    .cal-dot { width: 4px; height: 4px; border-radius: 50%; }
+
+    textarea { width: 100%; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 12px; padding: 12px; color: var(--text); font-size: 13px; resize: none; outline: none; line-height: 1.5; }
+    textarea:focus { border-color: var(--amber); }
+
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .stat-box { background: var(--btn-icon-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
+    .stat-val { font-size: 20px; font-weight: 800; color: var(--amber); margin-top: 4px; }
+    .stat-label { font-size: 11px; color: var(--text-muted); }
+
+    .bottom-nav { min-height: 64px; padding-bottom: env(safe-area-inset-bottom); background: var(--bottomnav-bg); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-around; flex-shrink: 0; }
+    .nav-btn { flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--text-dim); background: none; border: none; font-size: 10px; font-weight: 700; cursor: pointer; padding: 6px 0; }
+    .nav-btn.active { color: var(--amber); }
+    .nav-btn .icon { font-size: 17px; }
+
+    .modal-wrap { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: none; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px); }
+    .modal-wrap.active { display: flex; }
+    .modal-box { background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 400px; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 10px; max-height: 86vh; color: var(--text); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+    .input-field { width: 100%; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 10px; padding: 10px 12px; color: var(--text); font-size: 13px; outline: none; }
+    .action-btn { background: var(--amber); color: #000; border: none; border-radius: 10px; padding: 10px; font-weight: 800; font-size: 13px; cursor: pointer; }
+    .search-list { overflow-y: auto; max-height: 200px; display: flex; flex-direction: column; gap: 6px; }
+    .result-row { display: flex; gap: 8px; background: var(--card); padding: 8px; border-radius: 8px; align-items: center; }
+    .hint-text { font-size: 10px; color: var(--text-dim); text-align: center; margin-top: 4px; }
+
+    /* DİYALOGLAR */
+    .dialog-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
+    .dialog-overlay.active { display: flex; }
+    .dialog-box { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 18px; width: 100%; max-width: 330px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 15px 30px rgba(0,0,0,0.4); text-align: center; }
+    .dialog-title { font-size: 14px; font-weight: 800; color: var(--amber); }
+    .dialog-msg { font-size: 13px; color: var(--text); line-height: 1.4; word-break: break-word; }
+    .dialog-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .dialog-btn { flex: 1; padding: 10px; border-radius: 10px; font-weight: 700; font-size: 12px; border: none; cursor: pointer; }
+    .dialog-btn-primary { background: var(--amber); color: #000; }
+    .dialog-btn-cancel { background: var(--btn-icon-bg); color: var(--text-muted); border: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+  <div class="app-root">
+
+    <header class="top-bar" id="headerSection">
+      <button class="icon-btn" onclick="shiftDay(-1)">‹</button>
+      <div class="date-wrap">
+        <div class="day-badge" id="dayName">GÜN</div>
+        <div class="date-main" id="dateText">Tarih</div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Aydınlık / Karanlık">☀️</button>
+        <button class="icon-btn" onclick="shiftDay(1)">›</button>
+      </div>
+    </header>
+
+    <div class="content-area" id="mainScrollArea">
+
+      <!-- 1. GÜNLÜK SEKME -->
+      <div class="tab-pane active" id="tab-daily">
+        
+        <div class="memory-card" id="memoryCard">
+          <div style="font-size: 10px; color: var(--purple); font-weight: 800; text-transform: uppercase;">⏳ Tarihte Bugün</div>
+          <div id="memoryTitle" style="font-weight: 700; font-size: 13px; margin-top: 3px; color: var(--text);"></div>
+          <div id="memoryDesc" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;"></div>
+        </div>
+
+        <!-- DİNAMİK ASİSTAN & YAKLAŞAN PLAN HATIRLATICISI -->
+        <div class="smart-reminder-card" id="smartReminderCard">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div id="smartReminderBadge" style="font-size: 10px; font-weight: 800; text-transform: uppercase;">PLAN HATIRLATICI</div>
+            <button onclick="dismissTodayReminder()" style="background:none; border:none; color:var(--text-dim); font-size:12px; cursor:pointer;">Kapat ✕</button>
+          </div>
+          <div id="smartReminderTitle" style="font-weight: 800; font-size: 13px; margin-top: 3px; color: var(--text);"></div>
+          <div id="smartReminderTips" style="font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height:1.4;"></div>
+        </div>
+
+        <div class="day-meta-row">
+          <div class="location-tag" id="locBadge" onclick="editLocation()">
+            <span>📍</span>
+            <span id="locText">Konum Ekle</span>
+          </div>
+          <div class="mood-selector">
+            <button class="mood-btn" onclick="selectMood('harika')">😊</button>
+            <button class="mood-btn" onclick="selectMood('iyi')">😌</button>
+            <button class="mood-btn" onclick="selectMood('notr')">😐</button>
+            <button class="mood-btn" onclick="selectMood('yorgun')">🥱</button>
+            <button class="mood-btn" onclick="selectMood('dusuk')">🌧️</button>
+          </div>
+        </div>
+
+        <!-- AYRIK ZİNCİRİ KIRMA & ALIŞKANLIKLAR -->
+        <div class="card" style="padding: 12px 14px;">
+          <div style="font-size:11px; font-weight:800; color:var(--text-muted); margin-bottom:8px; display:flex; justify-content:space-between;">
+            <span>GÜNLÜK HEDEFLER & ZİNCİR</span>
+            <span style="font-size:10px; color:var(--amber); cursor:pointer;" onclick="setBookDailyGoal()">⚙️ Okuma Hedefi Belirle</span>
+          </div>
+          <div class="habits-wrap">
+            <div class="habit-chip" id="habit-spor" onclick="toggleSportHabit()">
+              <span class="h-icon">🏃‍♂️</span>
+              <span>Spor</span>
+              <span class="habit-sub" id="sub-spor">Hedef</span>
+              <span class="habit-streak-badge" id="streak-spor">🔥 0</span>
+            </div>
+
+            <div class="habit-chip" id="habit-su" onclick="handleWaterClick()" oncontextmenu="event.preventDefault(); promptResetWater();">
+              <span class="h-icon">💧</span>
+              <span>Su (+250ml)</span>
+              <span class="habit-sub" id="sub-su">0 / 2000 ml</span>
+              <span class="habit-streak-badge" id="streak-su">🔥 0</span>
+            </div>
+
+            <div class="habit-chip" id="habit-kitap" onclick="promptAddBookDailyPages()">
+              <span class="h-icon">📖</span>
+              <span>Okuma</span>
+              <span class="habit-sub" id="sub-kitap">0 / 20 syf</span>
+              <span class="habit-streak-badge" id="streak-kitap">🔥 0</span>
+            </div>
+          </div>
+          <div class="hint-text" style="margin-top:6px;">💡 Su sayacını sıfırlamak için kutuya basılı tutun.</div>
+        </div>
+
+        <!-- COLORNOTE YAPIŞKAN NOTLAR -->
+        <section class="card">
+          <div class="card-head">
+            <span class="card-title">📌 Yapışkan Notlar</span>
+            <button class="badge-btn" onclick="openNewStickyModal()">+ Not Ekle</button>
+          </div>
+          <div class="sticky-grid" id="stickyContainer"></div>
+          <div class="hint-text">💡 Okumak, düzenlemek veya kopyalamak için dokunun</div>
+        </section>
+
+        <!-- ALIŞVERİŞ & GÖREV LİSTESİ -->
+        <section class="card">
+          <div class="card-head">
+            <span class="card-title">🛒 Alışveriş & Görev Listesi</span>
+            <button class="badge-btn" style="color:var(--rose); background:var(--rose-dim); border-color:rgba(251,113,133,0.3);" onclick="promptClearChecklist()">🧹 Temizle</button>
+          </div>
+          <div style="display:flex; gap:6px; margin-bottom:10px;">
+            <select id="newCheckCategory" class="input-field" style="width:105px; padding:8px 4px; font-size:11px;">
+              <option value="market">🛒 Market</option>
+              <option value="eczane">💊 Eczane</option>
+              <option value="is">💼 İş</option>
+              <option value="kirtasiye">✏️ Kırtasiye</option>
+              <option value="diger">🎯 Diğer</option>
+            </select>
+            <input id="newCheckItemInput" class="input-field" placeholder="Örn: Süt, Vitamin, Rapor..." onkeydown="if(event.key==='Enter') addChecklistItem()">
+            <button class="action-btn" style="width:65px; padding:8px;" onclick="addChecklistItem()">Ekle</button>
+          </div>
+          <div id="checklistContainer"></div>
+          <div class="hint-text">💡 Tamamlamak için dokunun, silmek için basılı tutun</div>
+        </section>
+
+        <!-- OKUNAN KİTAPLAR -->
+        <section class="card">
+          <div class="card-head">
+            <span class="card-title">📖 Şu An Okuduklarım</span>
+            <button class="badge-btn" onclick="openModal('bookModal')">+ Kitap Ekle / Ara</button>
+          </div>
+          <div id="activeBooksList"></div>
+          <div class="hint-text">💡 Alıntılar, sayfa takibi ve detaylar için kitaba dokunun</div>
+        </section>
+
+        <!-- İZLENEN DİZİ & FİLM -->
+        <section class="card">
+          <div class="card-head">
+            <span class="card-title">🎬 İzlenen Dizi & Film</span>
+            <button class="badge-btn" style="color:var(--sky); background:var(--sky-dim); border-color:rgba(56,189,248,0.3);" onclick="openMediaModal()">+ Dizi/Film Ara & Ekle</button>
+          </div>
+          <div id="mediaList"></div>
+          <div class="hint-text">💡 Silmek için dizi/filme basılı tutun</div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <span class="card-title">✍️ Günün Olayları & Notu</span>
+          </div>
+          <textarea id="dailyNoteArea" rows="5" placeholder="Bugün neler yaşandı? (#etiket kullanabilirsiniz...)" oninput="persistNote()" onfocus="handleNoteFocus()"></textarea>
+        </section>
+
+        <div id="keyboardSpacer" style="height: 10px;"></div>
+      </div>
+
+      <!-- 2. TAKVİM SEKME -->
+      <div class="tab-pane" id="tab-calendar">
+        <div class="card">
+          <div class="cal-header">
+            <button class="icon-btn" onclick="shiftCalMonth(-1)">‹</button>
+            <div class="cal-month-title" id="calMonthDisplay">Ay Yıl</div>
+            <button class="icon-btn" onclick="shiftCalMonth(1)">›</button>
+          </div>
+          <div class="cal-weekdays">
+            <span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span>
+          </div>
+          <div class="cal-grid" id="calendarDaysGrid"></div>
+
+          <div style="display:flex; justify-content:space-around; margin-top:14px; padding-top:10px; border-top:1px dashed var(--border); font-size:10px; color:var(--text-muted); flex-wrap:wrap; gap:6px;">
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--amber);"></span> Not</div>
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--emerald);"></span> Kitap</div>
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--sky);"></span> Dizi/Film</div>
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--rose);"></span> Konser</div>
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--amber);"></span> Yolculuk</div>
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--purple);"></span> Ziyaret</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. KİTAPLIK SEKME -->
+      <div class="tab-pane" id="tab-books">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">📚 Kitaplık Geçmişi</span>
+            <button class="badge-btn" onclick="openModal('bookModal')">+ Yeni Kitap</button>
+          </div>
+          <div id="allBooksList"></div>
+          <div class="hint-text">💡 Alıntılar ve detaylar için kitaba dokunun</div>
+        </div>
+      </div>
+
+      <!-- 4. ETKİNLİKLER & WATCHLIST -->
+      <div class="tab-pane" id="tab-events">
+        
+        <!-- PLANLAR VE ÖZEL ASİSTAN BÖLÜMÜ -->
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">🎟️ Planlar & Ziyaretler</span>
+            <button class="badge-btn" onclick="openNewPlanModal()">+ Plan Oluştur</button>
+          </div>
+          <div id="allEventsList"></div>
+          <div class="hint-text">💡 Detayları görmek ve hazırlık listesi için plana dokunun</div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">🍿 İzleme Listesi (Watchlist)</span>
+            <button class="badge-btn" style="color:var(--rose); background:var(--rose-dim); border-color:rgba(251,113,133,0.3);" onclick="openModal('watchlistModal')">+ İzlenecek Ekle</button>
+          </div>
+          <div id="watchlistContainer"></div>
+          <div class="hint-text">💡 Silmek için basılı tutun, "Bugün İzledim" ile günlüğe aktarın</div>
+        </div>
+
+      </div>
+
+      <!-- 5. ÖZET & YEDEK -->
+      <div class="tab-pane" id="tab-search">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title" id="challengeTitle">🎯 2026 Okuma & İzleme Hedefi</span>
+            <button class="badge-btn" onclick="editChallengeGoals()">Hedefleri Ayarla</button>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700;">
+                <span>📚 Kitap Hedefi: <span id="challengeBookCurrent">0</span> / <span id="challengeBookTarget">25</span></span>
+                <span id="challengeBookPercent" style="color:var(--emerald);">%0</span>
+              </div>
+              <div class="progress-bar-wrap">
+                <div id="challengeBookBar" class="progress-bar-fill" style="background:var(--emerald); width:0%;"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700;">
+                <span>🎬 Dizi & Film Hedefi: <span id="challengeMediaCurrent">0</span> / <span id="challengeMediaTarget">50</span></span>
+                <span id="challengeMediaPercent" style="color:var(--sky);">%0</span>
+              </div>
+              <div class="progress-bar-wrap">
+                <div id="challengeMediaBar" class="progress-bar-fill" style="background:var(--sky); width:0%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">📊 Ay Sonu Özeti (Wrapped)</span>
+            <span id="wrappedMonthName" style="font-size:11px; color:var(--amber); font-weight:700;"></span>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-label">Biten Kitap</div>
+              <div class="stat-val" id="statBooks">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">İzlenen Yapım</div>
+              <div class="stat-val" id="statMedias">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Spor Yapılan Gün</div>
+              <div class="stat-val" id="statHabits">0 gün</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Baskın Ruh Hali</div>
+              <div class="stat-val" id="statMood">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom:8px;">🔍 Günlük & Arşiv Araması</div>
+          <input id="globalSearchInput" class="input-field" placeholder="Kelime, #etiket veya film/kitap adı ara..." oninput="executeGlobalSearch()">
+          <div id="globalSearchResults" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom:8px;">💾 Veri Yedekleme & Güvenlik</div>
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:12px; line-height:1.4;">
+            Tüm notlarınızı, yapışkan notları, planları, kontrol listelerini, alışveriş listesini ve geçmişi cihazınıza .json dosyası olarak indirebilir veya geri yükleyebilirsiniz.
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="action-btn" style="flex:1; background:var(--emerald); color:#fff;" onclick="startBackupExport()">
+              ⬇️ Yedeği İndir
+            </button>
+            <button class="action-btn" style="flex:1; background:var(--btn-icon-bg); color:var(--text);" onclick="startBackupImport()">
+              ⬆️ Yedeği Geri Yükle
+            </button>
+          </div>
+          <input type="file" id="iosFileInput" accept=".json,application/json" style="display:none;" onchange="handleIosFileRestore(event)">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ALT MENÜ -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" onclick="switchTab('daily', this)">
+        <span class="icon">📝</span>
+        <span>Günlük</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('calendar', this)">
+        <span class="icon">📅</span>
+        <span>Takvim</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('books', this)">
+        <span class="icon">📚</span>
+        <span>Kitaplık</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('events', this)">
+        <span class="icon">🎟️</span>
+        <span>Planlar</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('search', this)">
+        <span class="icon">📊</span>
+        <span>Özet/Yedek</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- MODAL: YENİ GELİŞMİŞ PLAN OLUŞTURMA -->
+  <div class="modal-wrap" id="planModal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <b style="font-size:14px;">Plan / Etkinlik Oluştur</b>
+        <button onclick="closeModal('planModal')" style="background:none; border:none; color:var(--text-muted); font-size:20px;">✕</button>
+      </div>
+
+      <!-- Kategori Seçimi -->
+      <div>
+        <label style="font-size:11px; color:var(--text-muted); font-weight:700;">Plan Türü:</label>
+        <select id="planCategorySelect" class="input-field" style="margin-top:4px;" onchange="handlePlanCategoryChange()">
+          <option value="konser">🎵 Konser & Müzik</option>
+          <option value="yolculuk">🚗 Yolculuk & Seyahat</option>
+          <option value="ziyaret">💐 Ziyaret & Hasta Ziyareti</option>
+          <option value="bulusma">☕ Buluşma & Randevu</option>
+          <option value="genel">📌 Genel Plan & İş</option>
+        </select>
+      </div>
+
+      <input id="planDateInput" type="date" class="input-field">
+      <input id="planTitleInput" class="input-field" placeholder="Plan Başlığı (örn: Ankara Seyahati, Dede Ziyareti)">
+      <input id="planDescInput" class="input-field" placeholder="Mekan veya Not (örn: Şehir Hastanesi, AŞTİ)">
+
+      <!-- Otomatik Hazır Kontrol Listesi Alanı -->
+      <div style="border-top:1px dashed var(--border); padding-top:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <span style="font-size:11px; font-weight:700; color:var(--amber);">Önerilen Hazırlık Listesi:</span>
+          <span style="font-size:10px; color:var(--text-dim);">Otomatik eklenir</span>
+        </div>
+        <div id="planPresetChecklist" style="display:flex; flex-direction:column; gap:4px; max-height:110px; overflow-y:auto;"></div>
+      </div>
+
+      <button class="action-btn" onclick="saveNewPlan()">Planı Kaydet</button>
+    </div>
+  </div>
+
+  <!-- MODAL: PLAN DETAYI, HAZIRLIK LİSTESİ & KÖPRÜ (ALIŞVERİŞE AKTAR) -->
+  <div class="modal-wrap" id="planDetailModal">
+    <div class="modal-box" style="max-height:88vh;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <b style="font-size:14px;" id="detailPlanTitleHeader">Plan Detayı</b>
+        <button onclick="closeModal('planDetailModal')" style="background:none; border:none; color:var(--text-muted); font-size:20px;">✕</button>
+      </div>
+
+      <div style="background:var(--card); padding:10px; border-radius:12px; display:flex; flex-direction:column; gap:4px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="detailPlanBadge" class="cat-tag" style="margin-left:0; font-size:10px;"></span>
+          <span id="detailPlanDate" style="font-size:11px; font-weight:700; color:var(--amber);"></span>
+        </div>
+        <div id="detailPlanDesc" style="font-size:12px; color:var(--text-muted); margin-top:2px;"></div>
+      </div>
+
+      <!-- Hazırlık Kontrol Listesi -->
+      <div style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; font-weight:800; color:var(--text);">🎒 Hazırlık Maddeleri</span>
+          <button class="badge-btn" style="padding:3px 8px; font-size:10px;" onclick="addCustomPlanItem()">+ Madde Ekle</button>
+        </div>
+        <div id="planDetailItemsContainer" style="display:flex; flex-direction:column; gap:6px;"></div>
+
+        <!-- Etkinlik Sonrası Hatıra / Anı Notu -->
+        <div style="border-top:1px dashed var(--border); padding-top:8px; margin-top:4px;">
+          <div style="font-size:11px; font-weight:800; color:var(--purple); margin-bottom:4px;">📸 Etkinlik Hatırası / Notu:</div>
+          <textarea id="planMemoryNote" rows="2" placeholder="Etkinlik nasıl geçti? Gelecek yıllar için anı notu bırakın..." oninput="savePlanMemoryNote()" style="font-size:11px; padding:8px;"></textarea>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:4px;">
+        <button class="action-btn" style="background:var(--rose); color:#fff; width:75px;" onclick="deleteCurrentPlan()">Sil</button>
+        <button class="action-btn" style="background:var(--emerald); color:#fff; flex:1;" onclick="pushPlanItemsToShoppingList()">🛒 Maddeleri Alışverişe Aktar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DİĞER MODALLER -->
+  <div class="modal-wrap" id="bookDetailModal">
+    <div class="modal-box" style="max-height:88vh;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <b style="font-size:14px;">Kitap Detayı & Alıntılar</b>
+        <button onclick="closeModal('bookDetailModal')" style="background:none; border:none; color:var(--text-muted); font-size:20px;">✕</button>
+      </div>
+      <div style="display:flex; gap:12px; align-items:center; background:var(--card); padding:10px; border-radius:12px;">
+        <img id="detailBookCover" class="thumb" src="">
+        <div style="flex:1; min-width:0;">
+          <div id="detailBookTitle" style="font-weight:800; font-size:13px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
+          <div id="detailBookAuthor" style="font-size:11px; color:var(--text-muted);"></div>
+          <div id="detailBookDates" style="font-size:10px; color:var(--amber); margin-top:2px;"></div>
+        </div>
+      </div>
+      <div style="background:var(--btn-icon-bg); padding:10px; border-radius:12px;">
+        <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:700; margin-bottom:4px;">
+          <span>Okuma İlerlemesi:</span>
+          <span id="detailProgressText" style="color:var(--emerald);">0%</span>
+        </div>
+        <div class="progress-bar-wrap" style="height:8px;">
+          <div id="detailProgressBar" class="progress-bar-fill" style="background:var(--emerald); width:0%;"></div>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <input id="detailCurrentPage" type="number" class="input-field" placeholder="Kaldığım Sayfa" style="padding:6px 8px; font-size:11px;" oninput="updateBookPageProgress()">
+          <input id="detailTotalPages" type="number" class="input-field" placeholder="Toplam Sayfa" style="padding:6px 8px; font-size:11px;" oninput="updateBookPageProgress()">
+        </div>
+      </div>
+      <div style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
+        <div style="font-size:12px; font-weight:800; color:var(--amber); margin-top:4px;">💬 Kitaptan Alıntılar</div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <textarea id="newQuoteInput" rows="2" placeholder="Unutulmaz bir cümle veya not yazın..." style="padding:8px; font-size:11px;"></textarea>
+          <div style="display:flex; gap:6px;">
+            <input id="newQuotePage" type="number" class="input-field" placeholder="Sayfa No" style="width:90px; padding:6px 8px; font-size:11px;">
+            <button class="action-btn" style="flex:1; padding:6px; font-size:11px;" onclick="addBookQuote()">Alıntıyı Kaydet</button>
+          </div>
+        </div>
+        <div id="bookQuotesContainer" style="display:flex; flex-direction:column; gap:6px; margin-top:4px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-wrap" id="stickyModal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <b style="font-size:14px;" id="stickyModalHeader">Yapışkan Not</b>
+        <button onclick="closeModal('stickyModal')" style="background:none; border:none; color:var(--text-muted); font-size:20px;">✕</button>
+      </div>
+      <input type="hidden" id="editingStickyId" value="">
+      <input id="stickyTitleInput" class="input-field" placeholder="Başlık (örn: Fikir, Hatırlatma)">
+      <textarea id="stickyBodyInput" rows="6" placeholder="Not içeriği..."></textarea>
+      <div style="display:flex; gap:8px; align-items:center; margin-top:2px;">
+        <span style="font-size:11px; color:var(--text-muted);">Renk:</span>
+        <button type="button" class="color-picker-btn" onclick="selectStickyColor('#fef08a', this)" style="width:24px; height:24px; border-radius:50%; background:#fef08a; border:2px solid #fff;"></button>
+        <button type="button" class="color-picker-btn" onclick="selectStickyColor('#fed7aa', this)" style="width:24px; height:24px; border-radius:50%; background:#fed7aa; border:2px solid transparent;"></button>
+        <button type="button" class="color-picker-btn" onclick="selectStickyColor('#bbf7d0', this)" style="width:24px; height:24px; border-radius:50%; background:#bbf7d0; border:2px solid transparent;"></button>
+        <button type="button" class="color-picker-btn" onclick="selectStickyColor('#bae6fd', this)" style="width:24px; height:24px; border-radius:50%; background:#bae6fd; border:2px solid transparent;"></button>
+        <button type="button" class="color-picker-btn" onclick="selectStickyColor('#fbcfe8', this)" style="width:24px; height:24px; border-radius:50%; background:#fbcfe8; border:2px solid transparent;"></button>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:4px;">
+        <button class="action-btn" id="stickyCopyBtn" style="background:var(--sky); color:#fff; display:none; padding:10px 12px;" onclick="copyStickyNote()">📋 Kopyala</button>
+        <button class="action-btn" id="stickyDeleteBtn" style="background:var(--rose); color:#fff; display:none; padding:10px 12px;" onclick="deleteCurrentSticky()">Sil</button>
+        <button class="action-btn" style="flex:1;" onclick="saveStickyNote()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-wrap" id="bookModal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <b style="font-size:14px;">Kitap Ara / Ekle</b>
+        <button onclick="closeModal('bookModal')" style="background:none; border:none; color:var(--text-muted); font-size:20px;">✕</button>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <input id="searchInput" class="input-field" placeholder="Kitap veya yazar adı...">
+        <button class="action-btn" style="width:70px;" onclick="runBookSearch()">Ara</button>
+      </div>
+      <div id="searchStatus" style="font-size:11px; color:var(--text-muted); text-align:center;"></div>
+      <div class="search-list" id="searchResults"></div>
+      <div style="border-top:1px dashed var(--border); padding-top:8px;">
+        <div style="font-size:11px; color:var(--text-muted); margin-bottom:5px;">Veya doğrudan yazarak ekleyin:</div>
+        <div style="display:flex; gap:5px;">
+          <input id="manualTitle" class="input-field" style="padding:8px;" placeholder="Kitap Adı">
+          <input id="manualAuthor" class="input-field" style="padding:8px;" placeholder="Yazar">
+          <input id="manualPages" type="number" class="input-field" style="padding:8px; width:75px;" placeholder="Sayfa">
+          <button class="action-btn" style="padding:8px 12px; font-size:11px;" onclick="addManualBook()">Ekle</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-wrap" id="mediaModal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <b style="font-size:14px;">Dizi & Film Ara / Ekle</b>
+        <button onclick="closeModal('mediaModal')" style="background:none; border:none; color:var(--text-muted); font-size:20px;">✕</button>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <input id="mediaSearchInput" class="input-field" placeholder="Dizi veya Film adı yazın..." oninput="checkAutoEpisode()">
+        <button class="action-btn" style="width:70px; background:var(--sky); color:#fff;" onclick="runMediaSearch()">Ara</button>
+      </div>
+      <div id="mediaSearchStatus" style="font-size:11px; color:var(--text-muted); text-align:center;"></div>
+      <div class="search-list" id="mediaSearchResults"></div>
+      <div style="border-top:1px dashed var(--border); padding-top:8px; display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; gap:6px;">
+          <input id="mediaSeasonNote" class="input-field" placeholder="Bölüm Notu (örn: S03E01 veya Film)">
+          <select id="mediaRatingSelect" class="input-field" style="width:110px;">
+            <option value="5">★ 5/5</option>
+            <option value="4">★ 4/5</option>
+            <option value="3">★ 3/5</option>
+            <option value="2">★ 2/5</option>
+            <option value="1">★ 1/5</option>
+          </select>
+        </div>
+        <button class="action-btn" style="background:var(--btn-icon-bg); color:var(--text);" onclick="addManualMedia()">Doğrudan Başlığı Ekle</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-wrap" id="watchlistModal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <b style="font-size:14px;">İzleme Listesine Ekle</b>
+        <button onclick="closeModal('watchlistModal')" style="background:none; border:none; color:var(--text-muted); font-size:20px;">✕</button>
+      </div>
+      <input id="watchlistTitle" class="input-field" placeholder="Dizi veya Film adı...">
+      <input id="watchlistNote" class="input-field" placeholder="Not (Örn: Tavsiye edildi, Netflix)">
+      <button class="action-btn" style="background:var(--rose); color:#fff;" onclick="saveToWatchlist()">Listeye Kaydet</button>
+    </div>
+  </div>
+
+  <div class="dialog-overlay" id="appDialogOverlay">
+    <div class="dialog-box">
+      <div class="dialog-title" id="appDialogTitle">Günlüğüm</div>
+      <div class="dialog-msg" id="appDialogMessage"></div>
+      <input id="appDialogInput" class="input-field" style="display:none; text-align:center;">
+      <div class="dialog-actions">
+        <button class="dialog-btn dialog-btn-cancel" id="appDialogCancelBtn" style="display:none;">İptal</button>
+        <button class="dialog-btn dialog-btn-primary" id="appDialogConfirmBtn">Tamam</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let activeDate = new Date();
+    let calViewDate = new Date();
+    let currentStickyColor = '#fef08a';
+    let currentDetailBookId = null;
+    let currentDetailPlanId = null;
+
+    function toIso(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function appAlert(message, title = "Günlüğüm") {
+      return new Promise(resolve => {
+        const overlay = document.getElementById('appDialogOverlay');
+        document.getElementById('appDialogTitle').innerText = title;
+        document.getElementById('appDialogMessage').innerText = message;
+        document.getElementById('appDialogInput').style.display = 'none';
+        document.getElementById('appDialogCancelBtn').style.display = 'none';
+        overlay.classList.add('active');
+
+        document.getElementById('appDialogConfirmBtn').onclick = () => {
+          overlay.classList.remove('active');
+          resolve();
+        };
+      });
+    }
+
+    function appConfirm(message, title = "Onay") {
+      return new Promise(resolve => {
+        const overlay = document.getElementById('appDialogOverlay');
+        document.getElementById('appDialogTitle').innerText = title;
+        document.getElementById('appDialogMessage').innerText = message;
+        document.getElementById('appDialogInput').style.display = 'none';
+        const btnCancel = document.getElementById('appDialogCancelBtn');
+        const btnConfirm = document.getElementById('appDialogConfirmBtn');
+
+        btnCancel.style.display = 'block';
+        btnCancel.innerText = 'İptal';
+        btnConfirm.innerText = 'Evet';
+        overlay.classList.add('active');
+
+        btnConfirm.onclick = () => { overlay.classList.remove('active'); resolve(true); };
+        btnCancel.onclick = () => { overlay.classList.remove('active'); resolve(false); };
+      });
+    }
+
+    function appPrompt(message, defaultValue = "", title = "Girdi") {
+      return new Promise(resolve => {
+        const overlay = document.getElementById('appDialogOverlay');
+        const inp = document.getElementById('appDialogInput');
+        document.getElementById('appDialogTitle').innerText = title;
+        document.getElementById('appDialogMessage').innerText = message;
+        inp.style.display = 'block';
+        inp.value = defaultValue;
+        const btnCancel = document.getElementById('appDialogCancelBtn');
+        const btnConfirm = document.getElementById('appDialogConfirmBtn');
+
+        btnCancel.style.display = 'block';
+        btnCancel.innerText = 'İptal';
+        btnConfirm.innerText = 'Kaydet';
+        overlay.classList.add('active');
+        inp.focus();
+
+        btnConfirm.onclick = () => { overlay.classList.remove('active'); resolve(inp.value); };
+        btnCancel.onclick = () => { overlay.classList.remove('active'); resolve(null); };
+      });
+    }
+
+    function copyToClipboard(text, successMsg = "Panoya kopyalandı!") {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => appAlert(successMsg, "Kopyalandı"));
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        appAlert(successMsg, "Kopyalandı");
+      }
+    }
+
+    function initTheme() {
+      applyTheme(localStorage.getItem('lib_theme') || 'dark');
+    }
+
+    function toggleTheme() {
+      applyTheme(document.body.classList.contains('light-theme') ? 'dark' : 'light');
+    }
+
+    function applyTheme(theme) {
+      const btn = document.getElementById('themeToggleBtn');
+      if (theme === 'light') {
+        document.body.classList.add('light-theme');
+        if (btn) btn.innerText = '🌙';
+        localStorage.setItem('lib_theme', 'light');
+      } else {
+        document.body.classList.remove('light-theme');
+        if (btn) btn.innerText = '☀️';
+        localStorage.setItem('lib_theme', 'dark');
+      }
+    }
+
+    function handleNoteFocus() {
+      const spacer = document.getElementById('keyboardSpacer');
+      spacer.style.height = '280px';
+      setTimeout(() => {
+        document.getElementById('dailyNoteArea').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 250);
+    }
+
+    document.getElementById('dailyNoteArea').addEventListener('blur', () => {
+      document.getElementById('keyboardSpacer').style.height = '10px';
+    });
+
+    let pressTimer = null;
+    function attachLongPress(element, callback) {
+      element.addEventListener('touchstart', () => {
+        pressTimer = setTimeout(() => { callback(); pressTimer = null; }, 650);
+      }, { passive: true });
+      element.addEventListener('touchend', () => { if (pressTimer) clearTimeout(pressTimer); });
+      element.addEventListener('touchmove', () => { if (pressTimer) clearTimeout(pressTimer); });
+    }
+
+    // --- GELİŞMİŞ PLANLAR, HAZIRLIK LİSTELERİ & DİNAMİK ASİSTAN ---
+    const PLAN_TEMPLATES = {
+      konser: {
+        badge: '🎵 Konser',
+        bg: 'var(--rose-dim)',
+        color: 'var(--rose)',
+        items: ['Bilet barkodu / QR hazırla', 'Taşınabilir şarj aleti (powerbank)', 'Ulaşım rotasını kontrol et', 'Rahat ayakkabı seçimi'],
+        tips: (days) => days === 0 ? "Bilet barkodunu hazır tut! Konser öncesi telefon şarjının tam olduğundan emin ol." : "Grubun son setlist albümlerini dinleyip havaya girmek için harika bir gün. Ulaşım planını netleştir!"
+      },
+      yolculuk: {
+        badge: '🚗 Yolculuk',
+        bg: 'var(--amber-dim)',
+        color: 'var(--amber)',
+        items: ['Kimlik / Ehliyet / Pasaport', 'Şarj aletleri ve powerbank', 'Kullanılan düzenli ilaçlar', 'Kulaklık ve seyahat yastığı', 'Ev anahtarları ve priz kontrolü'],
+        tips: (days) => days === 0 ? "Yolculuk vakti! Kimlik, biletler ve cüzdanını son kez kontrol et. İyi yolculuklar!" : `${days} gün kaldı! Bavulunu şimdiden toparlamaya ve şarj aletlerini çantaya koymaya başla.`
+      },
+      ziyaret: {
+        badge: '💐 Ziyaret',
+        bg: 'var(--purple-dim)',
+        color: 'var(--purple)',
+        items: ['Çiçek veya meyve sepeti siparişi', 'Ziyaret saatlerini teyit et', 'Küçük bir hediye paketi', 'Geçmiş olsun / tebrik kartı'],
+        tips: (days) => days === 0 ? "Ziyaret günü! Gitmeden önce uygunluk ve ziyaret saatini teyit etmeyi unutma." : "Yanında götüreceğin çiçek, hediye veya meyve sepetini önceden sipariş etmek işini kolaylaştırır."
+      },
+      bulusma: {
+        badge: '☕ Buluşma',
+        bg: 'var(--sky-dim)',
+        color: 'var(--sky)',
+        items: ['Mekan ve saat teyidi', 'Yol süresini kontrol et', 'Gerekirse masa rezervasyonu'],
+        tips: (days) => days === 0 ? "Buluşma günü! Trafik durumunu ve mekan saatini kontrol ederek yola çık." : "Buluşulacak mekan rezervasyonunu ve konumunu kontrol etmeyi unutma."
+      },
+      genel: {
+        badge: '📌 Plan',
+        bg: 'var(--btn-icon-bg)',
+        color: 'var(--text-muted)',
+        items: ['Ajanda ve takvim kontrolü', 'Gerekli evrak / notlar'],
+        tips: (days) => days === 0 ? "Bugün planlı bir etkinliğin var, hazır mısın?" : `${days} gün sonra planın var, hatırlatıcıların devrede!`
+      }
+    };
+
+    function openNewPlanModal() {
+      document.getElementById('planDateInput').value = toIso(activeDate);
+      document.getElementById('planTitleInput').value = '';
+      document.getElementById('planDescInput').value = '';
+      document.getElementById('planCategorySelect').value = 'konser';
+      handlePlanCategoryChange();
+      openModal('planModal');
+    }
+
+    function handlePlanCategoryChange() {
+      const cat = document.getElementById('planCategorySelect').value;
+      const tpl = PLAN_TEMPLATES[cat] || PLAN_TEMPLATES.genel;
+      const container = document.getElementById('planPresetChecklist');
+      container.innerHTML = tpl.items.map(it => `
+        <div style="font-size:11px; color:var(--text); display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" checked data-item="${it}">
+          <span>${it}</span>
+        </div>
+      `).join('');
+    }
+
+    function saveNewPlan() {
+      const date = document.getElementById('planDateInput').value;
+      const title = document.getElementById('planTitleInput').value.trim();
+      const desc = document.getElementById('planDescInput').value.trim();
+      const cat = document.getElementById('planCategorySelect').value;
+      if (!date || !title) return;
+
+      const checkedItems = [];
+      document.querySelectorAll('#planPresetChecklist input[type="checkbox"]:checked').forEach(cb => {
+        checkedItems.push({ id: Date.now().toString() + Math.random(), text: cb.getAttribute('data-item'), checked: false });
+      });
+
+      const events = JSON.parse(localStorage.getItem('lib_events') || '[]');
+      events.push({
+        id: Date.now().toString(),
+        date: date,
+        title: title,
+        desc: desc,
+        category: cat,
+        items: checkedItems,
+        memoryNote: ''
+      });
+      localStorage.setItem('lib_events', JSON.stringify(events));
+
+      closeModal('planModal');
+      renderScreen();
+    }
+
+    function openPlanDetail(planId) {
+      currentDetailPlanId = planId;
+      const events = JSON.parse(localStorage.getItem('lib_events') || '[]');
+      const p = events.find(x => x.id === planId);
+      if (!p) return;
+
+      const tpl = PLAN_TEMPLATES[p.category] || PLAN_TEMPLATES.genel;
+      document.getElementById('detailPlanTitleHeader').innerText = p.title;
+      document.getElementById('detailPlanBadge').innerText = tpl.badge;
+      document.getElementById('detailPlanBadge').style.background = tpl.bg;
+      document.getElementById('detailPlanBadge').style.color = tpl.color;
+      document.getElementById('detailPlanDate').innerText = p.date;
+      document.getElementById('detailPlanDesc').innerText = p.desc || 'Not girilmedi.';
+
+      document.getElementById('planMemoryNote').value = p.memoryNote || '';
+      renderPlanDetailItems(p.items || []);
+      openModal('planDetailModal');
+    }
+
+    function renderPlanDetailItems(items) {
+      const container = document.getElementById('planDetailItemsContainer');
+      if (!items || items.length === 0) {
+        container.innerHTML = '<div style="font-size:11px; color:var(--text-dim); text-align:center; padding:8px;">Hazırlık maddesi yok.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      items.forEach((it, idx) => {
+        const row = document.createElement('div');
+        row.className = `checklist-row ${it.checked ? 'checked' : ''}`;
+        row.style.padding = '7px 10px';
+        row.innerHTML = `
+          <div style="display:flex; align-items:center; flex:1; min-width:0;">
+            <div class="chk-box" style="width:16px; height:16px; font-size:10px;">${it.checked ? '✓' : ''}</div>
+            <span style="font-size:12px; color:var(--text);">${it.text}</span>
+          </div>
+          <button onclick="event.stopPropagation(); deletePlanItem(${idx})" style="background:none; border:none; color:var(--rose); font-size:12px; cursor:pointer;">✕</button>
+        `;
+        row.onclick = () => togglePlanItem(idx);
+        container.appendChild(row);
+      });
+    }
+
+    function togglePlanItem(idx) {
+      if (!currentDetailPlanId) return;
+      const events = JSON.parse(localStorage.getItem('lib_events') || '[]');
+      const p = events.find(x => x.id === currentDetailPlanId);
+      if (p && p.items && p.items[idx]) {
+        p.items[idx].checked = !p.items[idx].checked;
+        localStorage.setItem('lib_events', JSON.stringify(events));
+        renderPlanDetailItems(p.items);
+      }
+    }
+
+    function deletePlanItem(idx) {
+      if (!currentDetailPlanId) return;
+      const events = JSON.parse(localStorage.getItem('lib_events') || '[]');
+      const p = events.find(x => x.id === currentDetailPlanId);
+      if (p && p.items) {
+        p.items.splice(idx, 1);
+        localStorage.setItem('lib_events', JSON.stringify(events));
+        renderPlanDetailItems(p.items);
+      }
+    }
+
+    async function addCustomPlanItem() {
+      if (!currentDetailPlanId) return;
+      const text = await appPrompt("Hazırlık maddesi yazın:", "", "Yeni Madde");
+      if (text && text.trim()) {
+        const events = JSON.parse(localStorage.getItem('lib_events') || '[]');
+        const p = events.find(x => x.id === currentDetailPlanId);
+        if (p) {
+          if (!p.items) p.items = [];
+          p.items.push({ id: Date.now().toString(), text: text.trim(), checked: false });
+          localStorage.setItem('lib_events', JSON.stringify(events));
+          renderPlanDetailItems(p.items);
+        }
+      }
+    }
+
+    function savePlanMemoryNote() {
+      if (!currentDetailPlanId) return;
+      const text = document.getElementById('planMemoryNote').value;
+      const events = JSON.parse(localStorage.getItem('lib_events') || '[]');
+      const p = events.find(x => x.id === currentDetailPlanId);
+      if (p) {
+        p.memoryNote = text;
+        localStorage.setItem('lib_events', JSON.stringify(events));
+      }
+    }
+
+    async function deleteCurrentPlan() {
+      if (!currentDetailPlanId) return;
+      const ok = await appConfirm("Bu planı silmek istiyor musunuz?", "Planı Sil");
+      if (ok) {
+        let events = JSON.parse(localStorage.getItem('lib_events') || '[]');
+        events = events.filter(x => x.id !== currentDetailPlanId);
+        localStorage.setItem('lib_events', JSON.stringify(events));
+        closeModal('planDetailModal');
+        renderScreen();
+      }
+    }
+
+    // KÖPRÜ: Plan maddelerini Alışveriş/Görev listesine aktarır
+    async function pushPlanItemsToShoppingList() {
+      if (!currentDetailPlanId) return;
+      const events = JSON.parse(localStorage.getItem('lib_events') || '[]');
+      const p = events.find(x => x.id === currentDetailPlanId);
+      if (!p || !p.items || p.items.length === 0) {
+        await appAlert("Aktarılacak madde bulunamadı.", "Bilgi");
+        return;
+      }
+
+      const list = JSON.parse(localStorage.getItem('lib_checklist') || '[]');
+      let added = 0;
+      p.items.forEach(it => {
+        if (!it.checked) {
+          let cat = 'diger';
+          if (p.category === 'yolculuk') cat = 'is';
+          else if (p.category === 'ziyaret') cat = 'market';
+          list.push({ id: Date.now().toString() + Math.random(), text: `${p.title}: ${it.text}`, cat: cat, checked: false });
+          added++;
+        }
+      });
+      localStorage.setItem('lib_checklist', JSON.stringify(list));
+      await appAlert(`${added} adet tamamlanmamış hazırlık maddesi Alışveriş/Görev listenize aktarıldı!`, "Aktarıldı");
+      renderChecklist();
+    }
+
+    // DİNAMİK ASİSTAN VE HATIRLATICI KONTROLÜ
+    function checkSmartReminders(currentIso) {
+      const events = JSON.parse(localStorage.getItem('lib_events') || '[]');
+      const card = document.getElementById('smartReminderCard');
+      const curMs = new Date(currentIso).getTime();
+
+      // Önümüzdeki 5 gün içindeki planları tara
+      const upcoming = events.find(e => {
+        const evMs = new Date(e.date).getTime();
+        const diffDays = Math.ceil((evMs - curMs) / (1000 * 60 * 60 * 24));
+        return diffDays >= 0 && diffDays <= 5;
+      });
+
+      if (upcoming) {
+        const diffDays = Math.ceil((new Date(upcoming.date).getTime() - curMs) / (1000 * 60 * 60 * 24));
+        const tpl = PLAN_TEMPLATES[upcoming.category] || PLAN_TEMPLATES.genel;
+
+        card.classList.add('active');
+        card.style.background = `linear-gradient(135deg, ${tpl.bg}, rgba(0,0,0,0.01))`;
+        card.style.border = `1px solid ${tpl.color}`;
+
+        document.getElementById('smartReminderBadge').innerText = `${tpl.badge} • ${diffDays === 0 ? 'BUGÜN' : diffDays + ' GÜN KALDI'}`;
+        document.getElementById('smartReminderBadge').style.color = tpl.color;
+        document.getElementById('smartReminderTitle').innerText = upcoming.title + (upcoming.desc ? ` (${upcoming.desc})` : '');
+        document.getElementById('smartReminderTips').innerText = tpl.tips(diffDays);
+      } else {
+        card.classList.remove('active');
+      }
+    }
+
+    function dismissTodayReminder() {
+      document.getElementById('smartReminderCard').classList.remove('active');
+    }
+
+    // --- ALIŞKANLIKLAR & AYRIK ZİNCİRLER ---
+    function computeSpecificStreak(habitKey) {
+      const habits = JSON.parse(localStorage.getItem('lib_habits') || '{}');
+      const waters = JSON.parse(localStorage.getItem('lib_water') || '{}');
+      const bookPages = JSON.parse(localStorage.getItem('lib_daily_pages') || '{}');
+      const targetPages = parseInt(localStorage.getItem('lib_daily_page_goal') || '20', 10);
+
+      let streak = 0;
+      let checkDate = new Date();
+
+      while (true) {
+        const iso = toIso(checkDate);
+        let done = false;
+        if (habitKey === 'spor') done = habits[iso] && habits[iso].spor;
+        else if (habitKey === 'su') done = (waters[iso] || 0) >= 2000;
+        else if (habitKey === 'kitap') done = (bookPages[iso] || 0) >= targetPages;
+
+        if (done) {
+          streak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          if (streak === 0 && toIso(checkDate) === toIso(new Date())) {
+            checkDate.setDate(checkDate.getDate() - 1);
+            continue;
+          }
+          break;
+        }
+      }
+      return streak;
+    }
+
+    function toggleSportHabit() {
+      const iso = toIso(activeDate);
+      const habits = JSON.parse(localStorage.getItem('lib_habits') || '{}');
+      if (!habits[iso]) habits[iso] = {};
+      habits[iso].spor = !habits[iso].spor;
+      localStorage.setItem('lib_habits', JSON.stringify(habits));
+      renderHabitsUI();
+      computeWrappedStats();
+    }
+
+    function handleWaterClick() {
+      const iso = toIso(activeDate);
+      const waters = JSON.parse(localStorage.getItem('lib_water') || '{}');
+      let cur = waters[iso] || 0;
+      cur += 250;
+      if (cur > 4000) cur = 250;
+      waters[iso] = cur;
+      localStorage.setItem('lib_water', JSON.stringify(waters));
+
+      const habits = JSON.parse(localStorage.getItem('lib_habits') || '{}');
+      if (!habits[iso]) habits[iso] = {};
+      habits[iso].su = (cur >= 2000);
+      localStorage.setItem('lib_habits', JSON.stringify(habits));
+      renderHabitsUI();
+    }
+
+    async function promptResetWater() {
+      const iso = toIso(activeDate);
+      const ok = await appConfirm("Bugünün su sayacını sıfırlamak istiyor musunuz?", "Su Takibi");
+      if (ok) {
+        const waters = JSON.parse(localStorage.getItem('lib_water') || '{}');
+        waters[iso] = 0;
+        localStorage.setItem('lib_water', JSON.stringify(waters));
+        const habits = JSON.parse(localStorage.getItem('lib_habits') || '{}');
+        if (habits[iso]) habits[iso].su = false;
+        localStorage.setItem('lib_habits', JSON.stringify(habits));
+        renderHabitsUI();
+      }
+    }
+
+    async function promptAddBookDailyPages() {
+      const iso = toIso(activeDate);
+      const bookPages = JSON.parse(localStorage.getItem('lib_daily_pages') || '{}');
+      const cur = bookPages[iso] || 0;
+      const target = parseInt(localStorage.getItem('lib_daily_page_goal') || '20', 10);
+
+      const val = await appPrompt(`Bugün toplam kaç sayfa okudunuz? (Hedef: ${target} syf):`, String(cur), "Okunan Sayfa");
+      if (val !== null) {
+        const p = Math.max(0, parseInt(val, 10) || 0);
+        bookPages[iso] = p;
+        localStorage.setItem('lib_daily_pages', JSON.stringify(bookPages));
+        const habits = JSON.parse(localStorage.getItem('lib_habits') || '{}');
+        if (!habits[iso]) habits[iso] = {};
+        habits[iso].kitap = (p >= target);
+        localStorage.setItem('lib_habits', JSON.stringify(habits));
+        renderHabitsUI();
+      }
+    }
+
+    async function setBookDailyGoal() {
+      const curTarget = localStorage.getItem('lib_daily_page_goal') || '20';
+      const val = await appPrompt("Günlük okuma hedefiniz kaç sayfa olsun?", curTarget, "Günlük Hedef");
+      if (val !== null && parseInt(val, 10) > 0) {
+        localStorage.setItem('lib_daily_page_goal', parseInt(val, 10));
+        renderHabitsUI();
+      }
+    }
+
+    function renderHabitsUI() {
+      const iso = toIso(activeDate);
+      const habits = JSON.parse(localStorage.getItem('lib_habits') || '{}');
+      const waters = JSON.parse(localStorage.getItem('lib_water') || '{}');
+      const bookPages = JSON.parse(localStorage.getItem('lib_daily_pages') || '{}');
+      const pageTarget = parseInt(localStorage.getItem('lib_daily_page_goal') || '20', 10);
+
+      const dayHabits = habits[iso] || {};
+      const curWater = waters[iso] || 0;
+      const curPages = bookPages[iso] || 0;
+
+      const elSpor = document.getElementById('habit-spor');
+      if (dayHabits.spor) {
+        elSpor.className = 'habit-chip active';
+        document.getElementById('sub-spor').innerText = 'Tamamlandı ✓';
+      } else {
+        elSpor.className = 'habit-chip';
+        document.getElementById('sub-spor').innerText = 'Hedef';
+      }
+      document.getElementById('streak-spor').innerText = `🔥 ${computeSpecificStreak('spor')}`;
+
+      const elSu = document.getElementById('habit-su');
+      document.getElementById('sub-su').innerText = `${curWater} / 2000 ml`;
+      if (curWater >= 2000) elSu.className = 'habit-chip active';
+      else if (curWater > 0) elSu.className = 'habit-chip partial';
+      else elSu.className = 'habit-chip';
+      document.getElementById('streak-su').innerText = `🔥 ${computeSpecificStreak('su')}`;
+
+      const elKitap = document.getElementById('habit-kitap');
+      document.getElementById('sub-kitap').innerText = `${curPages} / ${pageTarget} syf`;
+      if (curPages >= pageTarget) elKitap.className = 'habit-chip active';
+      else if (curPages > 0) elKitap.className = 'habit-chip partial';
+      else elKitap.className = 'habit-chip';
+      document.getElementById('streak-kitap').innerText = `🔥 ${computeSpecificStreak('kitap')}`;
+    }
+
+    // --- KİTAP VE MEDYA MOTORU ---
+    function runBookSearch() {
+      const q = document.getElementById('searchInput').value.trim();
+      const status = document.getElementById('searchStatus');
+      const list = document.getElementById('searchResults');
+      if (!q) return;
+
+      status.innerText = "Kitaplar ve sayfa sayıları taranıyor...";
+      list.innerHTML = "";
+
+      fetch("https://openlibrary.org/search.json?q=" + encodeURIComponent(q) + "&limit=6")
+        .then(r => r.json())
+        .then(data => renderBookResults(data.docs || []))
+        .catch(() => { status.innerText = "Arama bağlantısı kurulamadı. Aşağıdan elle ekleyebilirsiniz."; });
+    }
+
+    function renderBookResults(docs) {
+      const status = document.getElementById('searchStatus');
+      const list = document.getElementById('searchResults');
+      if (!docs || docs.length === 0) {
+        status.innerText = "Sonuç bulunamadı. Aşağıdan elle ekleyebilirsiniz.";
+        return;
+      }
+      status.innerText = "";
+      list.innerHTML = docs.map(doc => {
+        const title = (doc.title || 'Başlıksız').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const author = (doc.author_name ? doc.author_name[0] : 'Bilinmeyen Yazar').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const cover = doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : '';
+        const pages = doc.number_of_pages_median || doc.number_of_pages || 0;
+
+        return `
+          <div class="result-row">
+            <img src="${cover || 'https://via.placeholder.com/36x50?text=Yok'}" style="width:34px; height:46px; object-fit:cover; border-radius:4px;">
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:12px; font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${title}</div>
+              <div style="font-size:10px; color:var(--text-muted);">${author} ${pages ? '• <b>' + pages + ' sayfa</b>' : ''}</div>
+            </div>
+            <button class="badge-btn" onclick="saveBook('${title}', '${author}', '${cover}', ${pages})">Seç</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function saveBook(title, author, cover, totalPages = 0) {
+      const books = JSON.parse(localStorage.getItem('lib_books') || '[]');
+      books.push({
+        id: Date.now().toString(),
+        title: title,
+        author: author,
+        cover: cover,
+        totalPages: totalPages || 0,
+        currentPage: 0,
+        startDate: toIso(activeDate),
+        finishDate: null
+      });
+      localStorage.setItem('lib_books', JSON.stringify(books));
+      closeModal('bookModal');
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchResults').innerHTML = '';
+      renderScreen();
+    }
+
+    function addManualBook() {
+      const title = document.getElementById('manualTitle').value.trim();
+      const author = document.getElementById('manualAuthor').value.trim() || 'Bilinmeyen Yazar';
+      const pages = parseInt(document.getElementById('manualPages').value, 10) || 0;
+      if (!title) return;
+      saveBook(title, author, '', pages);
+      document.getElementById('manualTitle').value = '';
+      document.getElementById('manualAuthor').value = '';
+      document.getElementById('manualPages').value = '';
+    }
+
+    function finishBook(id) {
+      const books = JSON.parse(localStorage.getItem('lib_books') || '[]');
+      const b = books.find(x => x.id === id);
+      if (b) {
+        b.finishDate = toIso(activeDate);
+        if (b.totalPages > 0) b.currentPage = b.totalPages;
+        localStorage.setItem('lib_books', JSON.stringify(books));
+        renderScreen();
+      }
+    }
+
+    function openBookDetailModal(bookId) {
+      currentDetailBookId = bookId;
+      const books = JSON.parse(localStorage.getItem('lib_books') || '[]');
+      const b = books.find(x => x.id === bookId);
+      if (!b) return;
+
+      document.getElementById('detailBookCover').src = b.cover || 'https://via.placeholder.com/44x60?text=Kapak';
+      document.getElementById('detailBookTitle').innerText = b.title;
+      document.getElementById('detailBookAuthor').innerText = b.author;
+      document.getElementById('detailBookDates').innerText = b.finishDate ? `Bitti: ${b.finishDate}` : `Başlandı: ${b.startDate}`;
+
+      document.getElementById('detailCurrentPage').value = b.currentPage || '';
+      document.getElementById('detailTotalPages').value = b.totalPages || '';
+
+      updateBookPageUI(b.currentPage, b.totalPages);
+      renderBookQuotes();
+      openModal('bookDetailModal');
+    }
+
+    function updateBookPageProgress() {
+      if (!currentDetailBookId) return;
+      const cur = parseInt(document.getElementById('detailCurrentPage').value, 10) || 0;
+      const tot = parseInt(document.getElementById('detailTotalPages').value, 10) || 0;
+
+      const books = JSON.parse(localStorage.getItem('lib_books') || '[]');
+      const b = books.find(x => x.id === currentDetailBookId);
+      if (b) {
+        b.currentPage = cur;
+        b.totalPages = tot;
+        localStorage.setItem('lib_books', JSON.stringify(books));
+      }
+      updateBookPageUI(cur, tot);
+      renderScreen();
+    }
+
+    function updateBookPageUI(cur, tot) {
+      let percent = 0;
+      if (tot > 0 && cur > 0) percent = Math.min(100, Math.round((cur / tot) * 100));
+      document.getElementById('detailProgressText').innerText = `%${percent} (${cur || 0}/${tot || '?'} Sayfa)`;
+      document.getElementById('detailProgressBar').style.width = `${percent}%`;
+    }
+
+    function addBookQuote() {
+      if (!currentDetailBookId) return;
+      const quoteText = document.getElementById('newQuoteInput').value.trim();
+      const pageNo = document.getElementById('newQuotePage').value.trim();
+      if (!quoteText) return;
+
+      const quotes = JSON.parse(localStorage.getItem('lib_quotes') || '{}');
+      if (!quotes[currentDetailBookId]) quotes[currentDetailBookId] = [];
+
+      quotes[currentDetailBookId].unshift({
+        id: Date.now().toString(),
+        text: quoteText,
+        page: pageNo,
+        date: toIso(new Date())
+      });
+      localStorage.setItem('lib_quotes', JSON.stringify(quotes));
+
+      document.getElementById('newQuoteInput').value = '';
+      document.getElementById('newQuotePage').value = '';
+      renderBookQuotes();
+    }
+
+    function renderBookQuotes() {
+      if (!currentDetailBookId) return;
+      const quotes = JSON.parse(localStorage.getItem('lib_quotes') || '{}');
+      const bQuotes = quotes[currentDetailBookId] || [];
+      const container = document.getElementById('bookQuotesContainer');
+
+      if (bQuotes.length === 0) {
+        container.innerHTML = '<div style="font-size:11px; color:var(--text-dim); text-align:center; padding:8px;">Henüz alıntı eklenmemiş.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      bQuotes.forEach(q => {
+        const div = document.createElement('div');
+        div.style.background = 'var(--card)';
+        div.style.border = '1px solid var(--border)';
+        div.style.borderRadius = '10px';
+        div.style.padding = '8px 10px';
+        div.style.display = 'flex';
+        div.style.flexDirection = 'column';
+        div.style.gap = '4px';
+
+        div.innerHTML = `
+          <div style="font-size:12px; font-style:italic; color:var(--text); line-height:1.4;">“${q.text}”</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:var(--amber);">
+            <span>${q.page ? 'Sayfa: ' + q.page : ''} • ${q.date}</span>
+            <div style="display:flex; gap:6px;">
+              <button onclick="event.stopPropagation(); copyToClipboard('${q.text.replace(/'/g, "\\'")}${q.page ? ' (Sayfa: ' + q.page + ')' : ''}')" style="background:none; border:none; color:var(--sky); cursor:pointer; font-weight:700;">📋 Kopyala</button>
+              <button onclick="event.stopPropagation(); deleteQuote('${q.id}')" style="background:none; border:none; color:var(--rose); cursor:pointer;">Sil</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function deleteQuote(quoteId) {
+      const ok = await appConfirm("Bu alıntıyı silmek istiyor musunuz?", "Alıntı Sil");
+      if (ok && currentDetailBookId) {
+        const quotes = JSON.parse(localStorage.getItem('lib_quotes') || '{}');
+        quotes[currentDetailBookId] = (quotes[currentDetailBookId] || []).filter(x => x.id !== quoteId);
+        localStorage.setItem('lib_quotes', JSON.stringify(quotes));
+        renderBookQuotes();
+      }
+    }
+
+    // --- YAPIŞKAN NOTLAR ---
+    function selectStickyColor(c, btn) {
+      currentStickyColor = c;
+      document.querySelectorAll('.color-picker-btn').forEach(b => b.style.borderColor = 'transparent');
+      if (btn) btn.style.borderColor = '#fff';
+    }
+
+    function openNewStickyModal() {
+      document.getElementById('editingStickyId').value = '';
+      document.getElementById('stickyTitleInput').value = '';
+      document.getElementById('stickyBodyInput').value = '';
+      document.getElementById('stickyModalHeader').innerText = 'Yeni Yapışkan Not';
+      document.getElementById('stickyDeleteBtn').style.display = 'none';
+      document.getElementById('stickyCopyBtn').style.display = 'none';
+      selectStickyColor('#fef08a', document.querySelectorAll('.color-picker-btn')[0]);
+      openModal('stickyModal');
+    }
+
+    function openEditStickyModal(id) {
+      const stickies = JSON.parse(localStorage.getItem('lib_stickies') || '[]');
+      const st = stickies.find(x => x.id === id);
+      if (!st) return;
+
+      document.getElementById('editingStickyId').value = st.id;
+      document.getElementById('stickyTitleInput').value = st.title;
+      document.getElementById('stickyBodyInput').value = st.body;
+      document.getElementById('stickyModalHeader').innerText = 'Notu Oku / Düzenle';
+      document.getElementById('stickyDeleteBtn').style.display = 'block';
+      document.getElementById('stickyCopyBtn').style.display = 'block';
+
+      currentStickyColor = st.color || '#fef08a';
+      document.querySelectorAll('.color-picker-btn').forEach(b => {
+        if (b.style.backgroundColor.includes(st.color) || b.getAttribute('onclick').includes(st.color)) {
+          b.style.borderColor = '#fff';
+        } else {
+          b.style.borderColor = 'transparent';
+        }
+      });
+      openModal('stickyModal');
+    }
+
+    function copyStickyNote() {
+      const title = document.getElementById('stickyTitleInput').value.trim();
+      const body = document.getElementById('stickyBodyInput').value.trim();
+      copyToClipboard((title ? title + "\n\n" : "") + body, "Not panoya kopyalandı!");
+    }
+
+    function saveStickyNote() {
+      const editId = document.getElementById('editingStickyId').value;
+      const title = document.getElementById('stickyTitleInput').value.trim();
+      const body = document.getElementById('stickyBodyInput').value.trim();
+      if (!title && !body) return;
+
+      let stickies = JSON.parse(localStorage.getItem('lib_stickies') || '[]');
+      if (editId) {
+        const st = stickies.find(x => x.id === editId);
+        if (st) {
+          st.title = title || 'Not';
+          st.body = body;
+          st.color = currentStickyColor;
+        }
+      } else {
+        stickies.unshift({
+          id: Date.now().toString(),
+          title: title || 'Not',
+          body: body,
+          color: currentStickyColor
+        });
+      }
+
+      localStorage.setItem('lib_stickies', JSON.stringify(stickies));
+      closeModal('stickyModal');
+      renderStickies();
+    }
+
+    async function deleteCurrentSticky() {
+      const editId = document.getElementById('editingStickyId').value;
+      if (!editId) return;
+
+      const ok = await appConfirm("Bu yapışkan notu silmek istiyor musunuz?", "Notu Sil");
+      if (ok) {
+        let stickies = JSON.parse(localStorage.getItem('lib_stickies') || '[]');
+        localStorage.setItem('lib_stickies', JSON.stringify(stickies.filter(x => x.id !== editId)));
+        closeModal('stickyModal');
+        renderStickies();
+      }
+    }
+
+    function renderStickies() {
+      const stickies = JSON.parse(localStorage.getItem('lib_stickies') || '[]');
+      const container = document.getElementById('stickyContainer');
+      if (stickies.length === 0) {
+        container.innerHTML = '<div style="grid-column: span 2; color:var(--text-dim); font-size:12px; text-align:center; padding:10px;">Henüz yapışkan not yok.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      stickies.forEach(st => {
+        const div = document.createElement('div');
+        div.className = 'sticky-note';
+        div.style.backgroundColor = st.color;
+        div.innerHTML = `
+          <div>
+            <div class="sticky-title">${st.title}</div>
+            <div class="sticky-body">${st.body}</div>
+          </div>
+          <div style="font-size:9px; color:#555; text-align:right;">📌 Oku / Düzenle</div>
+        `;
+        div.onclick = () => openEditStickyModal(st.id);
+        container.appendChild(div);
+      });
+    }
+
+    // --- ALIŞVERİŞ LİSTESİ ---
+    function addChecklistItem() {
+      const input = document.getElementById('newCheckItemInput');
+      const cat = document.getElementById('newCheckCategory').value;
+      const val = input.value.trim();
+      if (!val) return;
+
+      const list = JSON.parse(localStorage.getItem('lib_checklist') || '[]');
+      list.push({ id: Date.now().toString(), text: val, cat: cat, checked: false });
+      localStorage.setItem('lib_checklist', JSON.stringify(list));
+      input.value = '';
+      renderChecklist();
+    }
+
+    function toggleCheckItem(id) {
+      const list = JSON.parse(localStorage.getItem('lib_checklist') || '[]');
+      const item = list.find(x => x.id === id);
+      if (item) {
+        item.checked = !item.checked;
+        localStorage.setItem('lib_checklist', JSON.stringify(list));
+        renderChecklist();
+      }
+    }
+
+    async function promptClearChecklist() {
+      const list = JSON.parse(localStorage.getItem('lib_checklist') || '[]');
+      if (list.length === 0) {
+        await appAlert("Listeniz zaten boş.", "Alışveriş Listesi");
+        return;
+      }
+      const hasCompleted = list.some(x => x.checked);
+      if (hasCompleted) {
+        const ok = await appConfirm("Tamamlanan (üstü çizili) maddeleri temizlemek istiyor musunuz?\n(Hayır derseniz tüm liste sorulacaktır)", "Listeyi Temizle");
+        if (ok) {
+          localStorage.setItem('lib_checklist', JSON.stringify(list.filter(x => !x.checked)));
+          renderChecklist();
+          return;
+        }
+      }
+      const clearAll = await appConfirm("TÜM listeyi tamamen temizlemek istiyor musunuz?", "Tümünü Temizle");
+      if (clearAll) {
+        localStorage.setItem('lib_checklist', JSON.stringify([]));
+        renderChecklist();
+      }
+    }
+
+    function renderChecklist() {
+      const list = JSON.parse(localStorage.getItem('lib_checklist') || '[]');
+      const container = document.getElementById('checklistContainer');
+      if (list.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-dim); font-size:12px; text-align:center; padding:10px;">Listeniz boş.</div>';
+        return;
+      }
+
+      const catBadges = {
+        market: { label: 'Market', bg: 'var(--amber-dim)', col: 'var(--amber)' },
+        eczane: { label: 'Eczane', bg: 'var(--rose-dim)', col: 'var(--rose)' },
+        is: { label: 'İş', bg: 'var(--sky-dim)', col: 'var(--sky)' },
+        kirtasiye: { label: 'Kırtasiye', bg: 'var(--purple-dim)', col: 'var(--purple)' },
+        diger: { label: 'Diğer', bg: 'var(--btn-icon-bg)', col: 'var(--text-dim)' }
+      };
+
+      container.innerHTML = '';
+      list.forEach(item => {
+        const badge = catBadges[item.cat] || catBadges.diger;
+        const row = document.createElement('div');
+        row.className = `checklist-row ${item.checked ? 'checked' : ''}`;
+        row.innerHTML = `
+          <div style="display:flex; align-items:center; min-width:0; flex:1;">
+            <div class="chk-box">${item.checked ? '✓' : ''}</div>
+            <div class="chk-text" style="font-size:13px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.text}</div>
+            <span class="cat-tag" style="background:${badge.bg}; color:${badge.col};">${badge.label}</span>
+          </div>
+          <div style="font-size:11px; color:var(--text-dim);">⋮</div>
+        `;
+        row.onclick = () => toggleCheckItem(item.id);
+        attachLongPress(row, async () => {
+          const ok = await appConfirm(`"${item.text}" maddesini silmek istiyor musunuz?`, "Madde Sil");
+          if (ok) {
+            localStorage.setItem('lib_checklist', JSON.stringify(list.filter(x => x.id !== item.id)));
+            renderChecklist();
+          }
+        });
+        container.appendChild(row);
+      });
+    }
+
+    // --- YILLIK CHALLENGE ---
+    function renderChallengeGoals() {
+      const currentYear = new Date().getFullYear();
+      document.getElementById('challengeTitle').innerText = `🎯 ${currentYear} Okuma & İzleme Hedefi`;
+
+      const targetBooks = parseInt(localStorage.getItem('lib_target_books') || '25', 10);
+      const targetMedias = parseInt(localStorage.getItem('lib_target_medias') || '50', 10);
+
+      document.getElementById('challengeBookTarget').innerText = targetBooks;
+      document.getElementById('challengeMediaTarget').innerText = targetMedias;
+
+      const books = JSON.parse(localStorage.getItem('lib_books') || '[]');
+      const doneBooks = books.filter(b => b.finishDate && b.finishDate.startsWith(String(currentYear))).length;
+      document.getElementById('challengeBookCurrent').innerText = doneBooks;
+
+      const pBooks = Math.min(100, Math.round((doneBooks / targetBooks) * 100));
+      document.getElementById('challengeBookPercent').innerText = `%${pBooks}`;
+      document.getElementById('challengeBookBar').style.width = `${pBooks}%`;
+
+      const medias = JSON.parse(localStorage.getItem('lib_medias') || '{}');
+      let doneMedias = 0;
+      Object.keys(medias).forEach(d => {
+        if (d.startsWith(String(currentYear))) doneMedias += medias[d].length;
+      });
+      document.getElementById('challengeMediaCurrent').innerText = doneMedias;
+
+      const pMedias = Math.min(100, Math.round((doneMedias / targetMedias) * 100));
+      document.getElementById('challengeMediaPercent').innerText = `%${pMedias}`;
+      document.getElementById('challengeMediaBar').style.width = `${pMedias}%`;
+    }
+
+    async function editChallengeGoals() {
+      const curB = localStorage.getItem('lib_target_books') || '25';
+      const curM = localStorage.getItem('lib_target_medias') || '50';
+
+      const promptB = await appPrompt("Bu yıl kaç kitap okumayı hedefliyorsunuz?", curB, "Kitap Hedefi");
+      if (promptB !== null && parseInt(promptB, 10) > 0) {
+        localStorage.setItem('lib_target_books', parseInt(promptB, 10));
+      }
+
+      const promptM = await appPrompt("Bu yıl kaç dizi/film izlemeyi hedefliyorsunuz?", curM, "Medya Hedefi");
+      if (promptM !== null && parseInt(promptM, 10) > 0) {
+        localStorage.setItem('lib_target_medias', parseInt(promptM, 10));
+      }
+
+      renderChallengeGoals();
+    }
+
+    // --- TAKVİM MOTORU (KATEGORİ NOKTALARI DAHİL) ---
+    function shiftCalMonth(delta) {
+      calViewDate.setMonth(calViewDate.getMonth() + delta);
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const year = calViewDate.getFullYear();
+      const month = calViewDate.getMonth();
+      document.getElementById('calMonthDisplay').innerText = calViewDate.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
+
+      const grid = document.getElementById('calendarDaysGrid');
+      grid.innerHTML = '';
+
+      const firstDayOfMonth = new Date(year, month, 1);
+      const lastDayOfMonth = new Date(year, month + 1, 0);
+
+      let startDayOfWeek = firstDayOfMonth.getDay() - 1;
+      if (startDayOfWeek === -1) startDayOfWeek = 6;
+
+      const prevMonthLastDay = new Date(year, month, 0).getDate();
+
+      const notes = JSON.parse(localStorage.getItem('lib_notes') || '{}');
+      const books = JSON.parse(localStorage.getItem('lib_books') || '[]');
+      const medias = JSON.parse(localStorage.getItem('lib_medias') || '{}');
+      const events = JSON.parse(localStorage.getItem('lib_events') || '[]');
+
+      const todayIso = toIso(new Date());
+      const activeIso = toIso(activeDate);
+
+      for (let i = startDayOfWeek - 1; i >= 0; i--) {
+        const cell = document.createElement('div');
+        cell.className = 'cal-cell other-month';
+        cell.innerHTML = `<span class="cal-num">${prevMonthLastDay - i}</span>`;
+        grid.appendChild(cell);
+      }
+
+      for (let d = 1; d <= lastDayOfMonth.getDate(); d++) {
+        const dObj = new Date(year, month, d);
+        const iso = toIso(dObj);
+
+        const cell = document.createElement('div');
+        cell.className = 'cal-cell';
+        if (iso === todayIso) cell.classList.add('today');
+        if (iso === activeIso) cell.classList.add('selected');
+
+        let dotsHtml = '';
+        if (notes[iso] && notes[iso].trim()) dotsHtml += '<span class="cal-dot" style="background:var(--amber);"></span>';
+        const hasBook = books.some(b => b.startDate <= iso && (!b.finishDate || b.finishDate >= iso));
+        if (hasBook) dotsHtml += '<span class="cal-dot" style="background:var(--emerald);"></span>';
+        if (medias[iso] && medias[iso].length > 0) dotsHtml += '<span class="cal-dot" style="background:var(--sky);"></span>';
+        
+        // Plan kategorisine göre takvim noktası
+        const dayEvents = events.filter(e => e.date === iso);
+        dayEvents.forEach(e => {
+          let dotColor = 'var(--text-dim)';
+          if (e.category === 'konser') dotColor = 'var(--rose)';
+          else if (e.category === 'yolculuk') dotColor = 'var(--amber)';
+          else if (e.category === 'ziyaret') dotColor = 'var(--purple)';
+          else if (e.category === 'bulusma') dotColor = 'var(--sky)';
+          dotsHtml += `<span class="cal-dot" style="background:${dotColor};"></span>`;
+        });
+
+        cell.innerHTML = `<span class="cal-num">${d}</span><div class="cal-dots">${dotsHtml}</div>`;
+
+        cell.onclick = () => {
+          activeDate = new Date(year, month, d);
+          switchTab('daily', document.querySelectorAll('.nav-btn')[0]);
+          renderScreen();
+        };
+
+        grid.appendChild(cell);
+      }
+    }
+
+    // --- GENEL METODLAR ---
+    function selectMood(moodKey) {
+      const iso = toIso(activeDate);
+      const moods = JSON.parse(localStorage.getItem('lib_moods') || '{}');
+      if (moods[iso] === moodKey) delete moods[iso];
+      else moods[iso] = moodKey;
+      localStorage.setItem('lib_moods', JSON.stringify(moods));
+      renderMoodUI(moods[iso]);
+      computeWrappedStats();
+    }
+
+    function renderMoodUI(selectedKey) {
+      const keys = ['harika', 'iyi', 'notr', 'yorgun', 'dusuk'];
+      document.querySelectorAll('.mood-btn').forEach((btn, idx) => {
+        if (keys[idx] === selectedKey) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+    }
+
+    async function editLocation() {
+      const iso = toIso(activeDate);
+      const locations = JSON.parse(localStorage.getItem('lib_locations') || '{}');
+      const promptVal = await appPrompt("Bugün neredeydin? (Semt, kafe, mekan):", locations[iso] || '', "Konum");
+      if (promptVal !== null) {
+        const trimmed = promptVal.trim();
+        if (trimmed) locations[iso] = trimmed;
+        else delete locations[iso];
+        localStorage.setItem('lib_locations', JSON.stringify(locations));
+        renderLocationUI(locations[iso]);
+      }
+    }
+
+    function renderLocationUI(loc) {
+      const badge = document.getElementById('locBadge');
+      const text = document.getElementById('locText');
+      if (loc) {
+        badge.classList.add('has-loc');
+        text.innerText = loc;
+      } else {
+        badge.classList.remove('has-loc');
+        text.innerText = 'Konum Ekle';
+      }
+    }
+
+    function checkAutoEpisode(customTitle) {
+      const title = (customTitle || document.getElementById('mediaSearchInput').value).trim().toLowerCase();
+      if (!title) return;
+      const medias = JSON.parse(localStorage.getItem('lib_medias') || '{}');
+      let lastEpStr = '';
+      Object.keys(medias).sort().forEach(dateKey => {
+        medias[dateKey].forEach(m => {
+          if (m.title && m.title.toLowerCase() === title && m.episode) lastEpStr = m.episode;
+        });
+      });
+      if (lastEpStr) {
+        const regex = /S?(\d+)[xEe](\d+)/i;
+        const match = lastEpStr.match(regex);
+        if (match) {
+          const sPad = String(parseInt(match[1], 10)).padStart(2, '0');
+          const ePad = String(parseInt(match[2], 10) + 1).padStart(2, '0');
+          document.getElementById('mediaSeasonNote').value = `S${sPad}E${ePad}`;
+          return;
+        }
+        const simpleNum = lastEpStr.match(/(\d+)/);
+        if (simpleNum) {
+          document.getElementById('mediaSeasonNote').value = lastEpStr.replace(simpleNum[1], parseInt(simpleNum[1], 10) + 1);
+        }
+      }
+    }
+
+    function openMediaModal() {
+      document.getElementById('mediaSeasonNote').value = '';
+      openModal('mediaModal');
+    }
+
+    function runMediaSearch() {
+      const q = document.getElementById('mediaSearchInput').value.trim();
+      const status = document.getElementById('mediaSearchStatus');
+      const list = document.getElementById('mediaSearchResults');
+      if (!q) return;
+
+      status.innerText = "Dizi ve filmler aranıyor...";
+      list.innerHTML = "";
+
+      fetch("https://api.tvmaze.com/search/shows?q=" + encodeURIComponent(q))
+        .then(r => r.json())
+        .then(data => renderMediaResults(data))
+        .catch(() => { status.innerText = "Sonuç bulunamadı. Doğrudan ekleyebilirsiniz."; });
+    }
+
+    function renderMediaResults(items) {
+      const status = document.getElementById('mediaSearchStatus');
+      const list = document.getElementById('mediaSearchResults');
+      if (!items || items.length === 0) {
+        status.innerText = "Sonuç bulunamadı. Doğrudan başlığı ekleyebilirsiniz.";
+        return;
+      }
+      status.innerText = "";
+      list.innerHTML = items.map(entry => {
+        const show = entry.show || {};
+        const title = (show.name || 'Başlıksız').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const year = show.premiered ? show.premiered.substring(0,4) : '';
+        const cover = (show.image && show.image.medium) ? show.image.medium.replace('http://', 'https://') : '';
+
+        return `
+          <div class="result-row">
+            <img src="${cover || 'https://via.placeholder.com/36x50?text=Yok'}" style="width:34px; height:46px; object-fit:cover; border-radius:4px;">
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:12px; font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${title}</div>
+              <div style="font-size:10px; color:var(--text-muted);">${year ? year + ' | ' : ''}${show.type || 'Dizi'}</div>
+            </div>
+            <button class="badge-btn" style="color:var(--sky); background:var(--sky-dim); border-color:rgba(56,189,248,0.4);" onclick="pickMediaResult('${title}', '${cover}')">Seç</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function pickMediaResult(title, cover) {
+      checkAutoEpisode(title);
+      saveSelectedMedia(title, cover);
+    }
+
+    function saveSelectedMedia(title, cover) {
+      const episode = document.getElementById('mediaSeasonNote').value.trim();
+      const rating = parseInt(document.getElementById('mediaRatingSelect').value, 10);
+      const iso = toIso(activeDate);
+
+      const medias = JSON.parse(localStorage.getItem('lib_medias') || '{}');
+      if (!medias[iso]) medias[iso] = [];
+      medias[iso].push({
+        id: Date.now().toString(),
+        title: title,
+        cover: cover,
+        episode: episode,
+        rating: rating
+      });
+      localStorage.setItem('lib_medias', JSON.stringify(medias));
+
+      closeModal('mediaModal');
+      document.getElementById('mediaSearchInput').value = '';
+      document.getElementById('mediaSeasonNote').value = '';
+      document.getElementById('mediaSearchResults').innerHTML = '';
+      renderScreen();
+    }
+
+    function addManualMedia() {
+      const title = document.getElementById('mediaSearchInput').value.trim();
+      if (!title) return;
+      saveSelectedMedia(title, '');
+    }
+
+    function checkMemoryOfTheDay(currentIso) {
+      const [year, month, day] = currentIso.split('-');
+      const currentYear = parseInt(year, 10);
+      const notes = JSON.parse(localStorage.getItem('lib_notes') || '{}');
+      const medias = JSON.parse(localStorage.getItem('lib_medias') || '{}');
+      const events = JSON.parse(localStorage.getItem('lib_events') || '[]');
+      const card = document.getElementById('memoryCard');
+
+      for (let y = currentYear - 1; y >= currentYear - 5; y--) {
+        const pastIso = `${y}-${month}-${day}`;
+        const pastNote = notes[pastIso];
+        const pastMed = medias[pastIso];
+        const pastEv = events.find(e => e.date === pastIso);
+
+        if (pastNote || (pastMed && pastMed.length > 0) || (pastEv && pastEv.memoryNote)) {
+          card.classList.add('active');
+          const diff = currentYear - y;
+          document.getElementById('memoryTitle').innerText = `${diff} Yıl Önce Bugün (${y}):`;
+          let desc = '';
+          if (pastNote) desc += `📝 "${pastNote.substring(0, 70)}${pastNote.length > 70 ? '...' : ''}" `;
+          if (pastMed && pastMed.length > 0) desc += `🎬 İzlenen: ${pastMed[0].title} `;
+          if (pastEv && pastEv.memoryNote) desc += `🎟️ Anı: "${pastEv.memoryNote}"`;
+          document.getElementById('memoryDesc').innerText = desc;
+          return;
+        }
+      }
+      card.classList.remove('active');
+    }
+
+    function executeGlobalSearch() {
+      const q = document.getElementById('globalSearchInput').value.trim().toLowerCase();
+      const resContainer = document.getElementById('globalSearchResults');
+      if (!q) {
+        resContainer.innerHTML = '<div style="font-size:12px; color:var(--text-dim); text-align:center; padding:10px;">Aramak için yazın...</div>';
+        return;
+      }
+
+      const notes = JSON.parse(localStorage.getItem('lib_notes') || '{}');
+      const medias = JSON.parse(localStorage.getItem('lib_medias') || '{}');
+      const locations = JSON.parse(localStorage.getItem('lib_locations') || '{}');
+      const events = JSON.parse(localStorage.getItem('lib_events') || '[]');
+      const results = [];
+
+      Object.keys(notes).forEach(d => {
+        if (notes[d].toLowerCase().includes(q)) results.push({ date: d, type: 'Not', text: notes[d] });
+      });
+      Object.keys(medias).forEach(d => {
+        medias[d].forEach(m => {
+          if (m.title.toLowerCase().includes(q)) results.push({ date: d, type: 'Film/Dizi', text: m.title });
+        });
+      });
+      Object.keys(locations).forEach(d => {
+        if (locations[d].toLowerCase().includes(q)) results.push({ date: d, type: 'Mekan', text: locations[d] });
+      });
+      events.forEach(e => {
+        if (e.title.toLowerCase().includes(q) || (e.desc && e.desc.toLowerCase().includes(q))) {
+          results.push({ date: e.date, type: 'Plan', text: e.title });
+        }
+      });
+
+      if (results.length === 0) {
+        resContainer.innerHTML = '<div style="font-size:12px; color:var(--text-dim); text-align:center; padding:10px;">Eşleşen kayıt bulunamadı.</div>';
+        return;
+      }
+
+      resContainer.innerHTML = results.slice(0, 15).map(r => `
+        <div class="item-row" style="justify-content:space-between; cursor:pointer;" onclick="jumpToDate('${r.date}')">
+          <div style="min-width:0; flex:1;">
+            <div style="font-weight:700; font-size:12px; color:var(--amber);">${r.date} <span style="color:var(--text-dim); font-size:10px;">[${r.type}]</span></div>
+            <div style="font-size:11px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.text}</div>
+          </div>
+          <span style="font-size:11px; color:var(--sky);">Git ›</span>
+        </div>
+      `).join('');
+    }
+
+    function jumpToDate(isoStr) {
+      const [y, m, d] = isoStr.split('-').map(Number);
+      activeDate = new Date(y, m - 1, d);
+      switchTab('daily', document.querySelectorAll('.nav-btn')[0]);
+      renderScreen();
+    }
+
+    function saveToWatchlist() {
+      const title = document.getElementById('watchlistTitle').value.trim();
+      const note = document.getElementById('watchlistNote').value.trim();
+      if (!title) return;
+
+      const list = JSON.parse(localStorage.getItem('lib_watchlist') || '[]');
+      list.push({ id: Date.now().toString(), title, note });
+      localStorage.setItem('lib_watchlist', JSON.stringify(list));
+
+      document.getElementById('watchlistTitle').value = '';
+      document.getElementById('watchlistNote').value = '';
+      closeModal('watchlistModal');
+      renderWatchlist();
+    }
+
+    function renderWatchlist() {
+      const list = JSON.parse(localStorage.getItem('lib_watchlist') || '[]');
+      const container = document.getElementById('watchlistContainer');
+      if (list.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-dim); font-size:12px; text-align:center; padding:10px;">İzleme listeniz boş.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      list.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.style.justifyContent = 'space-between';
+        row.innerHTML = `
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:700; font-size:13px; color:var(--text);">${item.title}</div>
+            <div style="font-size:11px; color:var(--text-muted);">${item.note || 'Not yok'}</div>
+          </div>
+          <button class="badge-btn" style="color:var(--emerald); background:var(--emerald-dim); border-color:rgba(16,185,129,0.3); font-size:10px;" onclick="convertWatchlistToMedia('${item.id}', '${item.title}')">Bugün İzledim</button>
+        `;
+        attachLongPress(row, async () => {
+          const ok = await appConfirm(`"${item.title}" yapımını izleme listenizden silmek istiyor musunuz?`, "İzleme Listesi");
+          if (ok) {
+            localStorage.setItem('lib_watchlist', JSON.stringify(list.filter(x => x.id !== item.id)));
+            renderWatchlist();
+          }
+        });
+        container.appendChild(row);
+      });
+    }
+
+    async function convertWatchlistToMedia(id, title) {
+      let list = JSON.parse(localStorage.getItem('lib_watchlist') || '[]');
+      localStorage.setItem('lib_watchlist', JSON.stringify(list.filter(x => x.id !== id)));
+
+      const iso = toIso(activeDate);
+      const medias = JSON.parse(localStorage.getItem('lib_medias') || '{}');
+      if (!medias[iso]) medias[iso] = [];
+      medias[iso].push({
+        id: Date.now().toString(),
+        title: title,
+        cover: '',
+        episode: 'İzlendi',
+        rating: 5
+      });
+      localStorage.setItem('lib_medias', JSON.stringify(medias));
+
+      renderWatchlist();
+      renderScreen();
+      await appAlert(`"${title}" bugünün günlüğüne izlendi olarak kaydedildi.`);
+    }
+
+    function computeWrappedStats() {
+      const year = activeDate.getFullYear();
+      const month = String(activeDate.getMonth() + 1).padStart(2, '0');
+      const yearMonth = `${year}-${month}`;
+
+      document.getElementById('wrappedMonthName').innerText = activeDate.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
+
+      const books = JSON.parse(localStorage.getItem('lib_books') || '[]');
+      document.getElementById('statBooks').innerText = books.filter(b => b.finishDate && b.finishDate.startsWith(yearMonth)).length;
+
+      const medias = JSON.parse(localStorage.getItem('lib_medias') || '{}');
+      let mediaCount = 0;
+      Object.keys(medias).forEach(d => {
+        if (d.startsWith(yearMonth)) mediaCount += medias[d].length;
+      });
+      document.getElementById('statMedias').innerText = mediaCount;
+
+      const habits = JSON.parse(localStorage.getItem('lib_habits') || '{}');
+      let sportDays = 0;
+      Object.keys(habits).forEach(d => {
+        if (d.startsWith(yearMonth) && habits[d].spor) sportDays++;
+      });
+      document.getElementById('statHabits').innerText = `${sportDays} gün`;
+
+      const moods = JSON.parse(localStorage.getItem('lib_moods') || '{}');
+      const moodCounts = {};
+      Object.keys(moods).forEach(d => {
+        if (d.startsWith(yearMonth)) {
+          const m = moods[d];
+          moodCounts[m] = (moodCounts[m] || 0) + 1;
+        }
+      });
+      const moodIcons = { harika: '😊 Harika', iyi: '😌 İyi', notr: '😐 Normal', yorgun: '🥱 Yorgun', dusuk: '🌧️ Düşük' };
+      let topMood = '-';
+      let maxC = 0;
+      Object.keys(moodCounts).forEach(m => {
+        if (moodCounts[m] > maxC) {
+          maxC = moodCounts[m];
+          topMood = moodIcons[m] || m;
+        }
+      });
+      document.getElementById('statMood').innerText = topMood;
+    }
+
+    // --- YEDEKLEME ---
+    function startBackupExport() {
+      const backupData = {
+        version: "3.7",
+        exportDate: new Date().toISOString(),
+        lib_books: JSON.parse(localStorage.getItem('lib_books') || '[]'),
+        lib_medias: JSON.parse(localStorage.getItem('lib_medias') || '{}'),
+        lib_notes: JSON.parse(localStorage.getItem('lib_notes') || '{}'),
+        lib_events: JSON.parse(localStorage.getItem('lib_events') || '[]'),
+        lib_moods: JSON.parse(localStorage.getItem('lib_moods') || '{}'),
+        lib_locations: JSON.parse(localStorage.getItem('lib_locations') || '{}'),
+        lib_habits: JSON.parse(localStorage.getItem('lib_habits') || '{}'),
+        lib_water: JSON.parse(localStorage.getItem('lib_water') || '{}'),
+        lib_daily_pages: JSON.parse(localStorage.getItem('lib_daily_pages') || '{}'),
+        lib_daily_page_goal: localStorage.getItem('lib_daily_page_goal') || '20',
+        lib_watchlist: JSON.parse(localStorage.getItem('lib_watchlist') || '[]'),
+        lib_stickies: JSON.parse(localStorage.getItem('lib_stickies') || '[]'),
+        lib_checklist: JSON.parse(localStorage.getItem('lib_checklist') || '[]'),
+        lib_quotes: JSON.parse(localStorage.getItem('lib_quotes') || '{}'),
+        lib_target_books: localStorage.getItem('lib_target_books') || '25',
+        lib_target_medias: localStorage.getItem('lib_target_medias') || '50'
+      };
+      const jsonStr = JSON.stringify(backupData, null, 2);
+
+      if (window.AndroidBridge && window.AndroidBridge.exportBackup) {
+        window.AndroidBridge.exportBackup(jsonStr);
+      } else {
+        const blob = new Blob([jsonStr], { type: "application/json" });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `gunluk_yedek_${toIso(new Date())}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    }
+
+    function startBackupImport() {
+      if (window.AndroidBridge && window.AndroidBridge.importBackup) {
+        window.AndroidBridge.importBackup();
+      } else {
+        document.getElementById('iosFileInput').click();
+      }
+    }
+
+    function handleIosFileRestore(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          const ok = await appConfirm("Bu yedeği geri yüklemek mevcut verilerinizin üzerine yazacaktır. Onaylıyor musunuz?", "Yedek Yükleme");
+          if (ok) {
+            restoreDataStore(data);
+            await appAlert("Yedek başarıyla geri yüklendi!");
+            renderScreen();
+          }
+        } catch(err) {
+          await appAlert("Geçersiz yedek dosyası.", "Hata");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    window.onBackupRestored = async function(base64Str) {
+      try {
+        const decoded = decodeURIComponent(escape(atob(base64Str)));
+        const data = JSON.parse(decoded);
+        const ok = await appConfirm("Bu yedeği geri yüklemek mevcut verilerinizin üzerine yazacaktır. Onaylıyor musunuz?", "Yedek Yükleme");
+        if (ok) {
+          restoreDataStore(data);
+          await appAlert("Yedek başarıyla geri yüklendi!");
+          renderScreen();
+        }
+      } catch(e) {
+        await appAlert("Yedek çözümlenemedi.", "Hata");
+      }
+    };
+
+    function restoreDataStore(data) {
+      if (data.lib_books) localStorage.setItem('lib_books', JSON.stringify(data.lib_books));
+      if (data.lib_medias) localStorage.setItem('lib_medias', JSON.stringify(data.lib_medias));
+      if (data.lib_notes) localStorage.setItem('lib_notes', JSON.stringify(data.lib_notes));
+      if (data.lib_events) localStorage.setItem('lib_events', JSON.stringify(data.lib_events));
+      if (data.lib_moods) localStorage.setItem('lib_moods', JSON.stringify(data.lib_moods));
+      if (data.lib_locations) localStorage.setItem('lib_locations', JSON.stringify(data.lib_locations));
+      if (data.lib_habits) localStorage.setItem('lib_habits', JSON.stringify(data.lib_habits));
+      if (data.lib_water) localStorage.setItem('lib_water', JSON.stringify(data.lib_water));
+      if (data.lib_daily_pages) localStorage.setItem('lib_daily_pages', JSON.stringify(data.lib_daily_pages));
+      if (data.lib_daily_page_goal) localStorage.setItem('lib_daily_page_goal', data.lib_daily_page_goal);
+      if (data.lib_watchlist) localStorage.setItem('lib_watchlist', JSON.stringify(data.lib_watchlist));
+      if (data.lib_stickies) localStorage.setItem('lib_stickies', JSON.stringify(data.lib_stickies));
+      if (data.lib_checklist) localStorage.setItem('lib_checklist', JSON.stringify(data.lib_checklist));
+      if (data.lib_quotes) localStorage.setItem('lib_quotes', JSON.stringify(data.lib_quotes));
+      if (data.lib_target_books) localStorage.setItem('lib_target_books', data.lib_target_books);
+      if (data.lib_target_medias) localStorage.setItem('lib_target_medias', data.lib_target_medias);
+    }
+
+    function persistNote() {
+      const iso = toIso(activeDate);
+      const notes = JSON.parse(localStorage.getItem('lib_notes') || '{}');
+      notes[iso] = document.getElementById('dailyNoteArea').value;
+      localStorage.setItem('lib_notes', JSON.stringify(notes));
+    }
+
+    function shiftDay(d) {
+      activeDate.setDate(activeDate.getDate() + d);
+      renderScreen();
+    }
+
+    function switchTab(name, btn) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      btn.classList.add('active');
+
+      const header = document.getElementById('headerSection');
+      header.style.display = (name === 'daily') ? 'flex' : 'none';
+      
+      if (name === 'calendar') renderCalendar();
+      if (name === 'search') {
+        renderChallengeGoals();
+        computeWrappedStats();
+      }
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    // --- ANA EKRAN ÇİZİMİ ---
+    function renderScreen() {
+      const iso = toIso(activeDate);
+
+      document.getElementById('dayName').innerText = activeDate.toLocaleDateString('tr-TR', { weekday: 'long' });
+      document.getElementById('dateText').innerText = activeDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      const books = JSON.parse(localStorage.getItem('lib_books') || '[]');
+      const medias = JSON.parse(localStorage.getItem('lib_medias') || '{}');
+      const notes = JSON.parse(localStorage.getItem('lib_notes') || '{}');
+      const events = JSON.parse(localStorage.getItem('lib_events') || '[]');
+      const moods = JSON.parse(localStorage.getItem('lib_moods') || '{}');
+      const locations = JSON.parse(localStorage.getItem('lib_locations') || '{}');
+
+      renderMoodUI(moods[iso]);
+      renderLocationUI(locations[iso]);
+      renderHabitsUI();
+      checkMemoryOfTheDay(iso);
+      checkSmartReminders(iso);
+      renderWatchlist();
+      renderStickies();
+      renderChecklist();
+      renderCalendar();
+      renderChallengeGoals();
+      computeWrappedStats();
+
+      // Aktif Kitaplar
+      const activeBooks = books.filter(b => b.startDate <= iso && (!b.finishDate || b.finishDate >= iso));
+      const bContainer = document.getElementById('activeBooksList');
+      if (activeBooks.length === 0) {
+        bContainer.innerHTML = '<div style="color:var(--text-dim); font-size:12px; text-align:center; padding:8px;">Bu tarihte okuma kaydı yok.</div>';
+      } else {
+        bContainer.innerHTML = '';
+        activeBooks.forEach(b => {
+          let percent = 0;
+          if (b.totalPages > 0 && b.currentPage > 0) percent = Math.min(100, Math.round((b.currentPage / b.totalPages) * 100));
+
+          const row = document.createElement('div');
+          row.className = 'item-row';
+          row.innerHTML = `
+            <img src="${b.cover || 'https://via.placeholder.com/44x60?text=Kapak'}" class="thumb">
+            <div style="flex:1; min-width:0;">
+              <div style="font-weight:700; font-size:13px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${b.title}</div>
+              <div style="font-size:11px; color:var(--text-muted);">${b.author}</div>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" style="width:${percent}%;"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--amber); margin-top:3px;">
+                <span>%${percent} (${b.currentPage || 0}/${b.totalPages || '?'})</span>
+                <span>Alıntılar ›</span>
+              </div>
+            </div>
+            <button class="finish-pill" onclick="event.stopPropagation(); finishBook('${b.id}')">Bitti</button>
+          `;
+          row.onclick = () => openBookDetailModal(b.id);
+          attachLongPress(row, async () => {
+            const ok = await appConfirm(`"${b.title}" kitabını silmek istiyor musunuz?`, "Kitap Sil");
+            if (ok) {
+              localStorage.setItem('lib_books', JSON.stringify(books.filter(x => x.id !== b.id)));
+              renderScreen();
+            }
+          });
+          bContainer.appendChild(row);
+        });
+      }
+
+      // Medyalar
+      const todayMedia = medias[iso] || [];
+      const mContainer = document.getElementById('mediaList');
+      if (todayMedia.length === 0) {
+        mContainer.innerHTML = '<div style="color:var(--text-dim); font-size:12px; text-align:center; padding:8px;">Bugün izlenen bir yapım eklenmedi.</div>';
+      } else {
+        mContainer.innerHTML = '';
+        todayMedia.forEach((m, idx) => {
+          const row = document.createElement('div');
+          row.className = 'item-row';
+          row.innerHTML = `
+            <img src="${m.cover || 'https://via.placeholder.com/44x60?text=Afiş'}" class="thumb">
+            <div style="flex:1; min-width:0;">
+              <div style="font-weight:700; font-size:13px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.title}</div>
+              <div style="font-size:11px; color:var(--text-muted);">${m.episode || 'İzlendi'}</div>
+            </div>
+            <div style="color:var(--amber); font-weight:bold; font-size:12px;">★ ${m.rating}/5</div>
+          `;
+          attachLongPress(row, async () => {
+            const ok = await appConfirm(`"${m.title}" kaydını silmek istiyor musunuz?`, "İzleme Sil");
+            if (ok) {
+              medias[iso].splice(idx, 1);
+              if (medias[iso].length === 0) delete medias[iso];
+              localStorage.setItem('lib_medias', JSON.stringify(medias));
+              renderScreen();
+            }
+          });
+          mContainer.appendChild(row);
+        });
+      }
+
+      document.getElementById('dailyNoteArea').value = notes[iso] || '';
+
+      // Kitaplık Sekmesi
+      const allBooks = document.getElementById('allBooksList');
+      if (books.length === 0) {
+        allBooks.innerHTML = '<div style="color:var(--text-dim); font-size:12px; text-align:center; padding:8px;">Henüz kitap eklenmemiş.</div>';
+      } else {
+        allBooks.innerHTML = '';
+        books.forEach(b => {
+          const row = document.createElement('div');
+          row.className = 'item-row';
+          row.innerHTML = `
+            <img src="${b.cover || 'https://via.placeholder.com/44x60?text=Kapak'}" class="thumb">
+            <div style="flex:1; min-width:0;">
+              <div style="font-weight:700; font-size:13px; color:var(--text);">${b.title}</div>
+              <div style="font-size:11px; color:var(--text-muted);">${b.author}</div>
+              <div style="font-size:10px; color:${b.finishDate ? 'var(--emerald)' : 'var(--amber)'}; margin-top:2px;">
+                ${b.finishDate ? 'Tamamlandı (' + b.finishDate + ')' : 'Okunuyor (' + b.startDate + ')'}
+              </div>
+            </div>
+            <span style="font-size:11px; color:var(--sky);">Alıntılar ›</span>
+          `;
+          row.onclick = () => openBookDetailModal(b.id);
+          attachLongPress(row, async () => {
+            const ok = await appConfirm(`"${b.title}" kitabını silmek istiyor musunuz?`, "Kitap Sil");
+            if (ok) {
+              localStorage.setItem('lib_books', JSON.stringify(books.filter(x => x.id !== b.id)));
+              renderScreen();
+            }
+          });
+          allBooks.appendChild(row);
+        });
+      }
+
+      // Planlar Listesi (Kategori Rozetli & Tıklanabilir)
+      const allEvents = document.getElementById('allEventsList');
+      if (events.length === 0) {
+        allEvents.innerHTML = '<div style="color:var(--text-dim); font-size:12px; text-align:center; padding:8px;">Planlanmış bir etkinlik yok.</div>';
+      } else {
+        allEvents.innerHTML = '';
+        events.sort((a,b)=>a.date.localeCompare(b.date)).forEach(e => {
+          const tpl = PLAN_TEMPLATES[e.category] || PLAN_TEMPLATES.genel;
+          const row = document.createElement('div');
+          row.className = 'item-row';
+          row.style.justifyContent = 'space-between';
+          row.innerHTML = `
+            <div style="flex:1; min-width:0;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span class="cat-tag" style="background:${tpl.bg}; color:${tpl.color}; margin-left:0;">${tpl.badge}</span>
+                <span style="font-weight:700; font-size:13px; color:var(--text);">${e.title}</span>
+              </div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${e.desc || ''}</div>
+            </div>
+            <div style="color:var(--amber); font-weight:bold; font-size:12px;">${e.date}</div>
+          `;
+          row.onclick = () => openPlanDetail(e.id);
+          allEvents.appendChild(row);
+        });
+      }
+    }
+
+    window.onload = function() {
+      initTheme();
+      renderScreen();
+    };
+  </script>
+</body>
+</html>
